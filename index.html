@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Epic Whiteboard Universe</title>
+    <title>Collaborative Whiteboard</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-        
         * {
             margin: 0;
             padding: 0;
@@ -14,829 +12,957 @@
         }
         
         body {
-            font-family: 'Orbitron', monospace;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             overflow: hidden;
-            color: #fff;
+            background: #f0f0f0;
+            touch-action: none;
         }
         
-        .universe-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 255, 198, 0.1) 0%, transparent 50%);
-        }
-        
-        #epic-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
+        #canvas {
+            display: block;
             cursor: crosshair;
-            background: rgba(255, 255, 255, 0.05);
+            background: white;
+            touch-action: none;
         }
         
         .toolbar {
             position: fixed;
             top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             display: flex;
             gap: 15px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            padding: 20px;
-            border-radius: 25px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-        
-        .tool-btn {
-            width: 60px;
-            height: 60px;
-            border: none;
-            border-radius: 15px;
-            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
-            color: #fff;
-            font-family: 'Orbitron', monospace;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .tool-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
-            background: linear-gradient(145deg, #3a3a4e, #2a2a3e);
-        }
-        
-        .tool-btn.active {
-            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
-            box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
-            transform: scale(1.1);
-        }
-        
-        .brush-controls {
-            display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px 15px;
-            border-radius: 15px;
+            z-index: 1000;
+            user-select: none;
         }
         
-        .brush-size-slider {
-            width: 100px;
-            height: 6px;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
-            border-radius: 3px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        
-        .brush-size-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            background: #fff;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-        
-        .color-palette {
+        .color-picker {
             display: flex;
             gap: 8px;
         }
         
         .color-btn {
-            width: 35px;
-            height: 35px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ddd;
             border-radius: 50%;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform 0.1s;
         }
         
         .color-btn:hover {
-            transform: scale(1.2);
-            box-shadow: 0 0 15px currentColor;
+            transform: scale(1.1);
         }
         
         .color-btn.active {
-            border-color: #fff;
-            box-shadow: 0 0 20px currentColor, inset 0 0 10px rgba(255, 255, 255, 0.3);
-            transform: scale(1.3);
+            border-color: #333;
+            transform: scale(1.2);
         }
         
-        .status-panel {
+        .size-control {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .size-slider {
+            width: 80px;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            background: #007AFF;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: #0056CC;
+        }
+        
+        .status {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            padding: 15px 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-size: 12px;
             z-index: 1000;
         }
         
-        .player-cursor {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 999;
-            transition: all 0.1s ease;
-            border: 2px solid #fff;
+        .status.connected {
+            color: #28a745;
         }
         
-        .particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 998;
+        .status.disconnected {
+            color: #dc3545;
         }
         
-        @keyframes explode {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0);
-            }
-        }
-        
-        @keyframes sparkle {
-            0% {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0.5) rotate(180deg);
-            }
-        }
-        
-        .loading-screen {
+        .zoom-controls {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            bottom: 20px;
+            right: 20px;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s ease;
+            gap: 10px;
+            z-index: 1000;
         }
         
-        .loading-title {
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
-            background-size: 400% 400%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientShift 3s ease-in-out infinite;
-            margin-bottom: 30px;
-        }
-        
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top: 3px solid #4ecdc4;
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
         }
         
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        .zoom-btn:hover {
+            background: #f8f9fa;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .debug {
+
+        .loading {
             position: fixed;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            z-index: 1001;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            z-index: 2000;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="loading-screen" id="loadingScreen">
-        <h1 class="loading-title">EPIC WHITEBOARD</h1>
-        <div class="loading-spinner"></div>
-        <p style="margin-top: 20px; opacity: 0.7;">Connecting to the universe...</p>
-    </div>
-
-    <div class="universe-container">
-        <canvas id="epic-canvas"></canvas>
-        
-        <div class="toolbar">
-            <div class="tool-btn active" data-tool="brush" title="Brush">🖌️</div>
-            <div class="tool-btn" data-tool="bomb" title="Bomb">💣</div>
-            <div class="tool-btn" data-tool="eraser" title="Eraser">🧽</div>
-            <div class="tool-btn" data-tool="laser" title="Laser">⚡</div>
-            <div class="tool-btn" data-tool="sparkle" title="Sparkles">✨</div>
-            
-            <div class="brush-controls">
-                <span style="font-size: 12px;">SIZE</span>
-                <input type="range" class="brush-size-slider" id="brushSize" min="2" max="50" value="8">
-                <span id="brushSizeValue" style="font-size: 12px; min-width: 25px;">8px</span>
-            </div>
-            
-            <div class="color-palette">
-                <div class="color-btn active" style="background: #ff6b6b" data-color="#ff6b6b"></div>
-                <div class="color-btn" style="background: #4ecdc4" data-color="#4ecdc4"></div>
-                <div class="color-btn" style="background: #45b7d1" data-color="#45b7d1"></div>
-                <div class="color-btn" style="background: #96ceb4" data-color="#96ceb4"></div>
-                <div class="color-btn" style="background: #feca57" data-color="#feca57"></div>
-                <div class="color-btn" style="background: #ff9ff3" data-color="#ff9ff3"></div>
-                <div class="color-btn" style="background: #54a0ff" data-color="#54a0ff"></div>
-                <div class="color-btn" style="background: #ffffff" data-color="#ffffff"></div>
-            </div>
+    <canvas id="canvas"></canvas>
+    
+    <div class="toolbar">
+        <div class="color-picker">
+            <div class="color-btn active" style="background: #000" data-color="#000000"></div>
+            <div class="color-btn" style="background: #f00" data-color="#ff0000"></div>
+            <div class="color-btn" style="background: #0f0" data-color="#00ff00"></div>
+            <div class="color-btn" style="background: #00f" data-color="#0000ff"></div>
+            <div class="color-btn" style="background: #ff0" data-color="#ffff00"></div>
+            <div class="color-btn" style="background: #f0f" data-color="#ff00ff"></div>
+            <div class="color-btn" style="background: #0ff" data-color="#00ffff"></div>
         </div>
         
-        <div class="status-panel">
-            <div style="font-size: 14px; margin-bottom: 5px;">🌌 <span id="playerCount">1</span> explorers online</div>
-            <div style="font-size: 12px; opacity: 0.7;" id="connectionStatus">Connecting...</div>
+        <div class="size-control">
+            <label>Size</label>
+            <input type="range" class="size-slider" min="1" max="50" value="5" id="brushSize">
+            <span id="sizeValue">5px</span>
         </div>
+        
+        <button class="action-btn" id="clearBtn">Clear View</button>
+    </div>
+    
+    <div class="status disconnected" id="status">Connecting...</div>
+    
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoomOut">-</button>
+        <button class="zoom-btn" id="zoomIn">+</button>
+        <button class="zoom-btn" id="resetView">⌂</button>
     </div>
 
-    <div class="debug" id="debug">
-        Canvas: Ready<br>
-        Tool: Brush<br>
-        Connection: Waiting...
-    </div>
+    <div class="loading" id="loading">Loading tiles...</div>
 
     <script>
-        class EpicWhiteboard {
+        /**
+         * Production Collaborative Whiteboard Frontend
+         * 
+         * Features:
+         * - Infinite pan and zoom
+         * - Real-time drawing synchronization
+         * - On-demand tile loading
+         * - Touch and mouse support
+         * - Optimized rendering
+         */
+
+        // Constants
+        const TILE_SIZE = 1000;
+        const MAX_ZOOM = 5;
+        const MIN_ZOOM = 0.1;
+        const ZOOM_STEP = 0.1;
+        const TILE_CACHE_SIZE = 50;
+        const RECONNECT_DELAY = 1000;
+        const PING_INTERVAL = 30000;
+
+        /**
+         * Main Whiteboard Application
+         */
+        class WhiteboardApp {
             constructor() {
-                this.canvas = document.getElementById('epic-canvas');
+                this.canvas = document.getElementById('canvas');
                 this.ctx = this.canvas.getContext('2d');
-                
-                // Simple state
+                this.currentColor = '#000000';
+                this.currentSize = 5;
                 this.isDrawing = false;
-                this.currentTool = 'brush';
-                this.currentColor = '#ff6b6b';
-                this.currentSize = 8;
-                this.currentStroke = [];
+                this.lastPoint = null;
                 
-                // Multiplayer
-                this.ws = null;
-                this.isConnected = false;
-                this.playerId = this.generatePlayerId();
-                this.playerCursors = new Map();
+                // Transform state
+                this.transform = {
+                    x: 0,
+                    y: 0,
+                    scale: 1
+                };
                 
-                // Effects
-                this.particles = [];
+                // Managers
+                this.networkManager = new NetworkManager(this);
+                this.tileManager = new TileManager(this);
+                this.inputManager = new InputManager(this);
+                this.renderer = new WhiteboardRenderer(this);
                 
-                // Debug
-                this.debug = document.getElementById('debug');
-                
-                console.log('🚀 Initializing Epic Whiteboard...');
-                
-                this.setupCanvas();
-                this.setupUI();
-                this.setupEvents();
-                this.connectToServer();
-                this.startAnimationLoop();
-                
-                // Hide loading screen
-                setTimeout(() => {
-                    document.getElementById('loadingScreen').classList.add('hidden');
-                    this.updateDebug('Canvas: Ready, Tool: Brush, Connection: ' + (this.isConnected ? 'Connected' : 'Connecting...'));
-                }, 1000);
+                this.init();
             }
             
-            generatePlayerId() {
-                return 'player_' + Math.random().toString(36).substr(2, 9);
+            init() {
+                this.setupCanvas();
+                this.setupControls();
+                this.setupEventListeners();
+                this.networkManager.connect();
+                this.startRenderLoop();
             }
             
             setupCanvas() {
-                // Simple canvas setup
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-                
-                this.ctx.lineCap = 'round';
-                this.ctx.lineJoin = 'round';
-                this.ctx.imageSmoothingEnabled = true;
-                
-                // Fill with slight background
-                this.ctx.fillStyle = 'rgba(10, 10, 30, 0.1)';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                window.addEventListener('resize', () => {
-                    this.canvas.width = window.innerWidth;
-                    this.canvas.height = window.innerHeight;
-                });
-                
-                console.log('✅ Canvas setup complete');
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
             }
             
-            setupUI() {
-                // Tool buttons
-                document.querySelectorAll('.tool-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        document.querySelector('.tool-btn.active').classList.remove('active');
-                        btn.classList.add('active');
-                        this.currentTool = btn.dataset.tool;
-                        this.updateDebug();
-                        console.log('🔧 Tool changed to:', this.currentTool);
-                    });
-                });
-                
-                // Color palette
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                this.renderer.redraw();
+            }
+            
+            setupControls() {
+                // Color picker
                 document.querySelectorAll('.color-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         document.querySelector('.color-btn.active').classList.remove('active');
                         btn.classList.add('active');
                         this.currentColor = btn.dataset.color;
-                        console.log('🎨 Color changed to:', this.currentColor);
                     });
                 });
                 
                 // Brush size
-                const brushSize = document.getElementById('brushSize');
-                const brushSizeValue = document.getElementById('brushSizeValue');
-                
-                brushSize.addEventListener('input', () => {
-                    this.currentSize = parseInt(brushSize.value);
-                    brushSizeValue.textContent = `${brushSize.value}px`;
+                const sizeSlider = document.getElementById('brushSize');
+                const sizeValue = document.getElementById('sizeValue');
+                sizeSlider.addEventListener('input', () => {
+                    this.currentSize = parseInt(sizeSlider.value);
+                    sizeValue.textContent = this.currentSize + 'px';
                 });
                 
-                console.log('✅ UI setup complete');
-            }
-            
-            setupEvents() {
-                // Mouse events
-                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
-                this.canvas.addEventListener('mousemove', this.draw.bind(this));
-                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
-                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+                // Clear button
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.renderer.clearView();
+                });
                 
-                // Touch events
-                this.canvas.addEventListener('touchstart', this.handleTouch.bind(this));
-                this.canvas.addEventListener('touchmove', this.handleTouch.bind(this));
-                this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+                // Zoom controls
+                document.getElementById('zoomIn').addEventListener('click', () => {
+                    this.zoomAt(this.canvas.width / 2, this.canvas.height / 2, ZOOM_STEP);
+                });
                 
-                console.log('✅ Events setup complete');
+                document.getElementById('zoomOut').addEventListener('click', () => {
+                    this.zoomAt(this.canvas.width / 2, this.canvas.height / 2, -ZOOM_STEP);
+                });
+                
+                document.getElementById('resetView').addEventListener('click', () => {
+                    this.resetView();
+                });
             }
             
-            getMousePos(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                return [
-                    e.clientX - rect.left,
-                    e.clientY - rect.top
-                ];
+            setupEventListeners() {
+                // Prevent default touch behaviors
+                document.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+                document.addEventListener('touchend', e => e.preventDefault(), { passive: false });
+                document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
             }
             
-            startDrawing(e) {
+            startRenderLoop() {
+                const renderFrame = () => {
+                    this.renderer.render();
+                    requestAnimationFrame(renderFrame);
+                };
+                renderFrame();
+            }
+            
+            // Transform utilities
+            screenToWorld(screenX, screenY) {
+                return {
+                    x: (screenX - this.transform.x) / this.transform.scale,
+                    y: (screenY - this.transform.y) / this.transform.scale
+                };
+            }
+            
+            worldToScreen(worldX, worldY) {
+                return {
+                    x: worldX * this.transform.scale + this.transform.x,
+                    y: worldY * this.transform.scale + this.transform.y
+                };
+            }
+            
+            zoomAt(screenX, screenY, delta) {
+                const worldPoint = this.screenToWorld(screenX, screenY);
+                const newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, this.transform.scale + delta));
+                
+                if (newScale !== this.transform.scale) {
+                    this.transform.scale = newScale;
+                    
+                    // Adjust translation to zoom at the specified point
+                    this.transform.x = screenX - worldPoint.x * this.transform.scale;
+                    this.transform.y = screenY - worldPoint.y * this.transform.scale;
+                    
+                    this.tileManager.updateVisibleTiles();
+                }
+            }
+            
+            resetView() {
+                this.transform.x = 0;
+                this.transform.y = 0;
+                this.transform.scale = 1;
+                this.tileManager.updateVisibleTiles();
+            }
+            
+            // Drawing methods
+            startDrawing(x, y) {
                 this.isDrawing = true;
-                const [x, y] = this.getMousePos(e);
-                
-                console.log(`🎯 Start drawing with ${this.currentTool} at (${x}, ${y})`);
-                
-                if (this.currentTool === 'bomb') {
-                    this.createBomb(x, y);
-                    return;
-                }
-                
-                if (this.currentTool === 'laser') {
-                    this.createLaser(x, y);
-                    return;
-                }
-                
-                if (this.currentTool === 'sparkle') {
-                    this.createSparkles(x, y);
-                    return;
-                }
-                
-                // Start stroke for brush/eraser
-                this.currentStroke = [{
-                    x: x,
-                    y: y,
-                    tool: this.currentTool,
-                    color: this.currentColor,
-                    size: this.currentSize
-                }];
+                this.lastPoint = { x, y };
+                this.drawStroke(x, y);
             }
             
-            draw(e) {
-                if (!this.isDrawing) return;
+            continueDrawing(x, y) {
+                if (!this.isDrawing || !this.lastPoint) return;
                 
-                const [currentX, currentY] = this.getMousePos(e);
-                const lastPoint = this.currentStroke[this.currentStroke.length - 1];
+                // Interpolate points for smooth lines
+                const dx = x - this.lastPoint.x;
+                const dy = y - this.lastPoint.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const steps = Math.max(1, Math.floor(distance / 2));
                 
-                // Draw locally immediately
-                this.drawLine(lastPoint.x, lastPoint.y, currentX, currentY, this.currentTool, this.currentColor, this.currentSize);
+                for (let i = 0; i < steps; i++) {
+                    const t = i / steps;
+                    const interpX = this.lastPoint.x + dx * t;
+                    const interpY = this.lastPoint.y + dy * t;
+                    this.drawStroke(interpX, interpY);
+                }
                 
-                // Add to stroke
-                this.currentStroke.push({
-                    x: currentX,
-                    y: currentY,
-                    tool: this.currentTool,
-                    color: this.currentColor,
-                    size: this.currentSize
-                });
+                this.lastPoint = { x, y };
             }
             
             stopDrawing() {
-                if (!this.isDrawing) return;
-                
                 this.isDrawing = false;
-                
-                // Send stroke to server
-                if (this.currentStroke.length > 1) {
-                    console.log('📤 Sending stroke with', this.currentStroke.length, 'points');
-                    this.sendMessage({
-                        type: 'stroke',
-                        stroke: this.currentStroke,
-                        tool: this.currentTool
-                    });
-                }
-                
-                this.currentStroke = [];
+                this.lastPoint = null;
             }
             
-            drawLine(fromX, fromY, toX, toY, tool, color, size) {
-                this.ctx.save();
-                
-                if (tool === 'eraser') {
-                    this.ctx.globalCompositeOperation = 'destination-out';
-                    this.ctx.strokeStyle = 'rgba(0,0,0,1)';
-                } else {
-                    this.ctx.globalCompositeOperation = 'source-over';
-                    this.ctx.strokeStyle = color;
-                    
-                    // Add glow effect for some tools
-                    if (tool === 'laser') {
-                        this.ctx.shadowBlur = 10;
-                        this.ctx.shadowColor = color;
-                    }
-                }
-                
-                this.ctx.lineWidth = size;
-                this.ctx.beginPath();
-                this.ctx.moveTo(fromX, fromY);
-                this.ctx.lineTo(toX, toY);
-                this.ctx.stroke();
-                
-                this.ctx.restore();
-            }
-            
-            createBomb(x, y) {
-                console.log('💣 Creating bomb at', x, y);
-                
-                // Create explosion particles
-                for (let i = 0; i < 20; i++) {
-                    const angle = (Math.PI * 2 * i) / 20;
-                    const velocity = 2 + Math.random() * 3;
-                    
-                    this.particles.push({
-                        x: x,
-                        y: y,
-                        vx: Math.cos(angle) * velocity,
-                        vy: Math.sin(angle) * velocity,
-                        life: 1000,
-                        maxLife: 1000,
-                        color: `hsl(${Math.random() * 60 + 10}, 100%, 60%)`,
-                        type: 'explosion'
-                    });
-                }
-                
-                // Clear area locally
-                this.ctx.save();
-                this.ctx.globalCompositeOperation = 'destination-out';
-                this.ctx.beginPath();
-                this.ctx.arc(x, y, this.currentSize * 3, 0, Math.PI * 2);
-                this.ctx.fill();
-                this.ctx.restore();
-                
-                // Send to server
-                this.sendMessage({
-                    type: 'bomb',
+            drawStroke(x, y) {
+                const stroke = {
                     x: x,
                     y: y,
-                    size: this.currentSize * 3,
-                    playerId: this.playerId
-                });
-            }
-            
-            createLaser(x, y) {
-                console.log('⚡ Creating laser from', x, y);
-                
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 500;
-                const endX = x + Math.cos(angle) * distance;
-                const endY = y + Math.sin(angle) * distance;
-                
-                // Draw laser locally
-                this.drawLine(x, y, endX, endY, 'laser', this.currentColor, this.currentSize);
-                
-                // Send to server
-                this.sendMessage({
-                    type: 'laser',
-                    fromX: x,
-                    fromY: y,
-                    toX: endX,
-                    toY: endY,
                     color: this.currentColor,
                     size: this.currentSize
-                });
-            }
-            
-            createSparkles(x, y) {
-                console.log('✨ Creating sparkles at', x, y);
-                
-                // Create sparkle particles
-                for (let i = 0; i < 10; i++) {
-                    const offsetX = (Math.random() - 0.5) * 40;
-                    const offsetY = (Math.random() - 0.5) * 40;
-                    
-                    this.particles.push({
-                        x: x + offsetX,
-                        y: y + offsetY,
-                        vx: (Math.random() - 0.5),
-                        vy: (Math.random() - 0.5),
-                        life: 1500,
-                        maxLife: 1500,
-                        color: this.currentColor,
-                        type: 'sparkle'
-                    });
-                }
+                };
                 
                 // Send to server
-                this.sendMessage({
-                    type: 'sparkle',
-                    x: x,
-                    y: y,
-                    color: this.currentColor
-                });
+                this.networkManager.sendStroke(stroke);
+                
+                // Draw locally for immediate feedback
+                this.renderer.drawStroke(stroke);
             }
             
-            handleTouch(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent(
-                    e.type === 'touchstart' ? 'mousedown' : 
-                    e.type === 'touchmove' ? 'mousemove' : 'mouseup',
-                    {
-                        clientX: touch.clientX,
-                        clientY: touch.clientY
-                    }
-                );
-                this.canvas.dispatchEvent(mouseEvent);
+            // Handle incoming strokes from server
+            onStrokeReceived(stroke) {
+                this.renderer.drawStroke(stroke);
+                this.tileManager.addStrokeToCache(stroke);
             }
             
-            connectToServer() {
+            // Handle tile data from server
+            onTileReceived(tileData) {
+                this.tileManager.storeTile(tileData);
+                this.renderer.redraw();
+            }
+        }
+
+        /**
+         * Network Manager - handles WebSocket communication
+         */
+        class NetworkManager {
+            constructor(app) {
+                this.app = app;
+                this.ws = null;
+                this.isConnected = false;
+                this.reconnectAttempts = 0;
+                this.maxReconnectAttempts = 10;
+                this.pingInterval = null;
+            }
+            
+            connect() {
                 try {
-                    console.log('🔌 Connecting to server...');
-                    this.ws = new WebSocket('wss://whiteboardbackend.lolbiggerestlol.workers.dev/');
+                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const wsUrl = \`\${protocol}//\${window.location.host}\`;
+                    
+                    this.ws = new WebSocket(wsUrl);
                     
                     this.ws.onopen = () => {
                         this.isConnected = true;
-                        document.getElementById('connectionStatus').textContent = 'Connected to universe';
-                        this.updateDebug();
-                        console.log('✅ Connected to server');
+                        this.reconnectAttempts = 0;
+                        this.updateStatus('Connected');
+                        this.startPing();
+                        
+                        // Request initial visible tiles
+                        this.app.tileManager.updateVisibleTiles();
                     };
                     
                     this.ws.onmessage = (event) => {
                         try {
-                            const data = JSON.parse(event.data);
-                            console.log('📨 Received:', data.type);
-                            this.handleServerMessage(data);
+                            const message = JSON.parse(event.data);
+                            this.handleMessage(message);
                         } catch (error) {
-                            console.error('❌ Error parsing message:', error);
+                            console.error('Message parse error:', error);
                         }
                     };
                     
                     this.ws.onclose = () => {
                         this.isConnected = false;
-                        document.getElementById('connectionStatus').textContent = 'Disconnected - Reconnecting...';
-                        this.updateDebug();
-                        console.log('🔌 Disconnected, reconnecting...');
-                        setTimeout(() => this.connectToServer(), 3000);
+                        this.updateStatus('Disconnected');
+                        this.stopPing();
+                        this.attemptReconnect();
                     };
                     
                     this.ws.onerror = (error) => {
-                        console.error('❌ WebSocket error:', error);
+                        console.error('WebSocket error:', error);
+                        this.updateStatus('Connection Error');
                     };
                     
                 } catch (error) {
-                    console.error('❌ Failed to connect:', error);
-                    document.getElementById('connectionStatus').textContent = 'Connection failed';
+                    console.error('Connection error:', error);
+                    this.updateStatus('Connection Failed');
+                    this.attemptReconnect();
                 }
             }
             
-            handleServerMessage(data) {
-                switch (data.type) {
+            handleMessage(message) {
+                switch (message.type) {
                     case 'stroke':
-                        this.drawRemoteStroke(data.stroke);
+                        this.app.onStrokeReceived(message.data);
                         break;
-                    case 'bomb':
-                        if (data.playerId !== this.playerId) {
-                            this.handleRemoteBomb(data);
-                        }
+                    case 'tileData':
+                        this.app.onTileReceived(message.tile);
                         break;
-                    case 'laser':
-                        this.drawRemoteLaser(data);
+                    case 'pong':
+                        // Heartbeat response
                         break;
-                    case 'sparkle':
-                        this.handleRemoteSparkle(data);
+                    case 'error':
+                        console.error('Server error:', message.message);
                         break;
-                    case 'clear':
-                        this.clearCanvas();
-                        break;
-                    case 'users_count':
-                        document.getElementById('playerCount').textContent = data.count;
-                        break;
-                    case 'canvas_state':
-                        this.loadCanvasState(data);
-                        break;
+                    default:
+                        console.warn('Unknown message type:', message.type);
                 }
             }
             
-            drawRemoteStroke(stroke) {
-                if (!stroke || stroke.length < 2) return;
-                
-                console.log('🎨 Drawing remote stroke with', stroke.length, 'points');
-                
-                const firstPoint = stroke[0];
-                this.ctx.save();
-                
-                if (firstPoint.tool === 'eraser') {
-                    this.ctx.globalCompositeOperation = 'destination-out';
-                    this.ctx.strokeStyle = 'rgba(0,0,0,1)';
-                } else {
-                    this.ctx.globalCompositeOperation = 'source-over';
-                    this.ctx.strokeStyle = firstPoint.color;
-                }
-                
-                this.ctx.lineWidth = firstPoint.size;
-                this.ctx.beginPath();
-                this.ctx.moveTo(stroke[0].x, stroke[0].y);
-                
-                for (let i = 1; i < stroke.length; i++) {
-                    this.ctx.lineTo(stroke[i].x, stroke[i].y);
-                }
-                
-                this.ctx.stroke();
-                this.ctx.restore();
-            }
-            
-            handleRemoteBomb(data) {
-                console.log('💥 Remote bomb exploded');
-                
-                // Create explosion
-                for (let i = 0; i < 20; i++) {
-                    const angle = (Math.PI * 2 * i) / 20;
-                    const velocity = 2 + Math.random() * 3;
-                    
-                    this.particles.push({
-                        x: data.x,
-                        y: data.y,
-                        vx: Math.cos(angle) * velocity,
-                        vy: Math.sin(angle) * velocity,
-                        life: 1000,
-                        maxLife: 1000,
-                        color: `hsl(${Math.random() * 60 + 10}, 100%, 60%)`,
-                        type: 'explosion'
-                    });
-                }
-                
-                // Clear area
-                this.ctx.save();
-                this.ctx.globalCompositeOperation = 'destination-out';
-                this.ctx.beginPath();
-                this.ctx.arc(data.x, data.y, data.size, 0, Math.PI * 2);
-                this.ctx.fill();
-                this.ctx.restore();
-            }
-            
-            drawRemoteLaser(data) {
-                console.log('⚡ Drawing remote laser');
-                this.drawLine(data.fromX, data.fromY, data.toX, data.toY, 'laser', data.color, data.size);
-            }
-            
-            handleRemoteSparkle(data) {
-                console.log('✨ Remote sparkles');
-                this.createSparkles(data.x, data.y);
-            }
-            
-            clearCanvas() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                // Restore background
-                this.ctx.fillStyle = 'rgba(10, 10, 30, 0.1)';
-                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            }
-            
-            loadCanvasState(data) {
-                console.log('📥 Loading canvas state');
-                if (data.strokes) {
-                    data.strokes.forEach(strokeData => {
-                        this.drawRemoteStroke(strokeData.stroke);
-                    });
-                }
-            }
-            
-            sendMessage(message) {
+            sendStroke(stroke) {
                 if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
-                    this.ws.send(JSON.stringify(message));
-                } else {
-                    console.log('❌ Cannot send - not connected');
+                    this.ws.send(JSON.stringify({
+                        type: 'stroke',
+                        data: stroke
+                    }));
                 }
             }
             
-            startAnimationLoop() {
-                const animate = () => {
-                    this.updateParticles();
-                    requestAnimationFrame(animate);
-                };
-                animate();
+            requestTiles(tiles) {
+                if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify({
+                        type: 'requestTiles',
+                        tiles: tiles
+                    }));
+                }
             }
             
-            updateParticles() {
-                this.particles = this.particles.filter(particle => {
-                    particle.x += particle.vx;
-                    particle.y += particle.vy;
-                    particle.life -= 16;
-                    
-                    if (particle.life > 0) {
-                        const alpha = particle.life / particle.maxLife;
-                        
-                        this.ctx.save();
-                        this.ctx.globalAlpha = alpha;
-                        this.ctx.fillStyle = particle.color;
-                        
-                        if (particle.type === 'sparkle') {
-                            this.ctx.shadowBlur = 5;
-                            this.ctx.shadowColor = particle.color;
-                        }
-                        
-                        this.ctx.beginPath();
-                        this.ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
-                        this.ctx.fill();
-                        this.ctx.restore();
-                        
-                        return true;
+            startPing() {
+                this.pingInterval = setInterval(() => {
+                    if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
+                        this.ws.send(JSON.stringify({ type: 'ping' }));
                     }
-                    return false;
-                });
+                }, PING_INTERVAL);
             }
             
-            updateDebug(custom = null) {
-                if (custom) {
-                    this.debug.innerHTML = custom;
+            stopPing() {
+                if (this.pingInterval) {
+                    clearInterval(this.pingInterval);
+                    this.pingInterval = null;
+                }
+            }
+            
+            attemptReconnect() {
+                if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                    this.reconnectAttempts++;
+                    this.updateStatus(\`Reconnecting... (\${this.reconnectAttempts}/\${this.maxReconnectAttempts})\`);
+                    
+                    setTimeout(() => {
+                        this.connect();
+                    }, RECONNECT_DELAY * this.reconnectAttempts);
                 } else {
-                    this.debug.innerHTML = `
-                        Canvas: Ready<br>
-                        Tool: ${this.currentTool}<br>
-                        Color: ${this.currentColor}<br>
-                        Size: ${this.currentSize}px<br>
-                        Connection: ${this.isConnected ? 'Connected' : 'Disconnected'}<br>
-                        Players: ${document.getElementById('playerCount').textContent}
-                    `;
+                    this.updateStatus('Connection Failed - Refresh to retry');
+                }
+            }
+            
+            updateStatus(status) {
+                const statusEl = document.getElementById('status');
+                statusEl.textContent = status;
+                statusEl.className = 'status ' + (this.isConnected ? 'connected' : 'disconnected');
+            }
+        }
+
+        /**
+         * Tile Manager - handles tile loading and caching
+         */
+        class TileManager {
+            constructor(app) {
+                this.app = app;
+                this.tileCache = new Map(); // tileKey -> { strokes: [], lastAccess: timestamp }
+                this.loadedTiles = new Set();
+                this.pendingTiles = new Set();
+            }
+            
+            getTileKey(tileX, tileY) {
+                return \`\${tileX}:\${tileY}\`;
+            }
+            
+            getTileCoords(worldX, worldY) {
+                return {
+                    x: Math.floor(worldX / TILE_SIZE),
+                    y: Math.floor(worldY / TILE_SIZE)
+                };
+            }
+            
+            getVisibleTiles() {
+                const viewport = this.getViewport();
+                const tiles = [];
+                
+                const startTileX = Math.floor(viewport.left / TILE_SIZE);
+                const endTileX = Math.floor(viewport.right / TILE_SIZE);
+                const startTileY = Math.floor(viewport.top / TILE_SIZE);
+                const endTileY = Math.floor(viewport.bottom / TILE_SIZE);
+                
+                for (let tx = startTileX; tx <= endTileX; tx++) {
+                    for (let ty = startTileY; ty <= endTileY; ty++) {
+                        tiles.push({ x: tx, y: ty });
+                    }
+                }
+                
+                return tiles;
+            }
+            
+            getViewport() {
+                const topLeft = this.app.screenToWorld(0, 0);
+                const bottomRight = this.app.screenToWorld(this.app.canvas.width, this.app.canvas.height);
+                
+                return {
+                    left: topLeft.x,
+                    top: topLeft.y,
+                    right: bottomRight.x,
+                    bottom: bottomRight.y
+                };
+            }
+            
+            updateVisibleTiles() {
+                const visibleTiles = this.getVisibleTiles();
+                const tilesToRequest = [];
+                
+                for (const tile of visibleTiles) {
+                    const tileKey = this.getTileKey(tile.x, tile.y);
+                    
+                    if (!this.loadedTiles.has(tileKey) && !this.pendingTiles.has(tileKey)) {
+                        tilesToRequest.push(tile);
+                        this.pendingTiles.add(tileKey);
+                    }
+                }
+                
+                if (tilesToRequest.length > 0) {
+                    this.app.networkManager.requestTiles(tilesToRequest);
+                }
+            }
+            
+            storeTile(tileData) {
+                const tileKey = this.getTileKey(tileData.x, tileData.y);
+                
+                this.tileCache.set(tileKey, {
+                    strokes: tileData.strokes || [],
+                    lastAccess: Date.now()
+                });
+                
+                this.loadedTiles.add(tileKey);
+                this.pendingTiles.delete(tileKey);
+                
+                // Manage cache size
+                if (this.tileCache.size > TILE_CACHE_SIZE) {
+                    this.evictOldestTile();
+                }
+            }
+            
+            getTile(tileX, tileY) {
+                const tileKey = this.getTileKey(tileX, tileY);
+                const tile = this.tileCache.get(tileKey);
+                
+                if (tile) {
+                    tile.lastAccess = Date.now();
+                    return tile.strokes;
+                }
+                
+                return [];
+            }
+            
+            addStrokeToCache(stroke) {
+                const tileCoords = this.getTileCoords(stroke.x, stroke.y);
+                const tileKey = this.getTileKey(tileCoords.x, tileCoords.y);
+                
+                if (this.tileCache.has(tileKey)) {
+                    const tile = this.tileCache.get(tileKey);
+                    tile.strokes.push(stroke);
+                    tile.lastAccess = Date.now();
+                }
+            }
+            
+            evictOldestTile() {
+                let oldestKey = null;
+                let oldestTime = Date.now();
+                
+                for (const [key, tile] of this.tileCache) {
+                    if (tile.lastAccess < oldestTime) {
+                        oldestTime = tile.lastAccess;
+                        oldestKey = key;
+                    }
+                }
+                
+                if (oldestKey) {
+                    this.tileCache.delete(oldestKey);
+                    this.loadedTiles.delete(oldestKey);
                 }
             }
         }
+
+        /**
+         * Input Manager - handles mouse and touch events
+         */
+        class InputManager {
+            constructor(app) {
+                this.app = app;
+                this.isPanning = false;
+                this.lastPanPoint = null;
+                this.touches = new Map();
+                
+                this.setupEventListeners();
+            }
+            
+            setupEventListeners() {
+                const canvas = this.app.canvas;
+                
+                // Mouse events
+                canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+                canvas.addEventListener('wheel', (e) => this.handleWheel(e));
+                
+                // Touch events
+                canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
+                canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
+                canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+                
+                // Prevent context menu
+                canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+            }
+            
+            // Mouse event handlers
+            handleMouseDown(e) {
+                e.preventDefault();
+                const rect = this.app.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (e.button === 0) { // Left mouse button
+                    const worldPoint = this.app.screenToWorld(x, y);
+                    this.app.startDrawing(worldPoint.x, worldPoint.y);
+                } else if (e.button === 2) { // Right mouse button
+                    this.startPanning(x, y);
+                }
+            }
+            
+            handleMouseMove(e) {
+                e.preventDefault();
+                const rect = this.app.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                if (this.app.isDrawing) {
+                    const worldPoint = this.app.screenToWorld(x, y);
+                    this.app.continueDrawing(worldPoint.x, worldPoint.y);
+                } else if (this.isPanning) {
+                    this.continuePanning(x, y);
+                }
+            }
+            
+            handleMouseUp(e) {
+                e.preventDefault();
+                
+                if (e.button === 0) {
+                    this.app.stopDrawing();
+                } else if (e.button === 2) {
+                    this.stopPanning();
+                }
+            }
+            
+            handleWheel(e) {
+                e.preventDefault();
+                const rect = this.app.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
+                this.app.zoomAt(x, y, delta);
+            }
+            
+            // Touch event handlers
+            handleTouchStart(e) {
+                e.preventDefault();
+                const rect = this.app.canvas.getBoundingClientRect();
+                
+                for (const touch of e.changedTouches) {
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    
+                    this.touches.set(touch.identifier, { x, y, startTime: Date.now() });
+                }
+                
+                if (e.touches.length === 1) {
+                    // Single touch - start drawing
+                    const touch = e.touches[0];
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    const worldPoint = this.app.screenToWorld(x, y);
+                    this.app.startDrawing(worldPoint.x, worldPoint.y);
+                } else if (e.touches.length === 2) {
+                    // Two finger touch - start panning
+                    this.app.stopDrawing();
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    const centerX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+                    const centerY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+                    this.startPanning(centerX, centerY);
+                }
+            }
+            
+            handleTouchMove(e) {
+                e.preventDefault();
+                const rect = this.app.canvas.getBoundingClientRect();
+                
+                if (e.touches.length === 1 && this.app.isDrawing) {
+                    // Single touch - continue drawing
+                    const touch = e.touches[0];
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
+                    const worldPoint = this.app.screenToWorld(x, y);
+                    this.app.continueDrawing(worldPoint.x, worldPoint.y);
+                } else if (e.touches.length === 2 && this.isPanning) {
+                    // Two finger touch - continue panning
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    const centerX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
+                    const centerY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
+                    this.continuePanning(centerX, centerY);
+                }
+            }
+            
+            handleTouchEnd(e) {
+                e.preventDefault();
+                
+                for (const touch of e.changedTouches) {
+                    this.touches.delete(touch.identifier);
+                }
+                
+                if (e.touches.length === 0) {
+                    this.app.stopDrawing();
+                    this.stopPanning();
+                }
+            }
+            
+            // Panning utilities
+            startPanning(x, y) {
+                this.isPanning = true;
+                this.lastPanPoint = { x, y };
+                this.app.canvas.style.cursor = 'grab';
+            }
+            
+            continuePanning(x, y) {
+                if (!this.isPanning || !this.lastPanPoint) return;
+                
+                const dx = x - this.lastPanPoint.x;
+                const dy = y - this.lastPanPoint.y;
+                
+                this.app.transform.x += dx;
+                this.app.transform.y += dy;
+                
+                this.lastPanPoint = { x, y };
+                this.app.tileManager.updateVisibleTiles();
+            }
+            
+            stopPanning() {
+                this.isPanning = false;
+                this.lastPanPoint = null;
+                this.app.canvas.style.cursor = 'crosshair';
+            }
+        }
+
+        /**
+         * Whiteboard Renderer - handles canvas drawing and optimization
+         */
+        class WhiteboardRenderer {
+            constructor(app) {
+                this.app = app;
+                this.needsRedraw = true;
+                this.strokeBuffer = [];
+            }
+            
+            render() {
+                if (this.needsRedraw) {
+                    this.redraw();
+                    this.needsRedraw = false;
+                }
+                
+                // Draw buffered strokes
+                if (this.strokeBuffer.length > 0) {
+                    this.drawBufferedStrokes();
+                    this.strokeBuffer = [];
+                }
+            }
+            
+            redraw() {
+                const ctx = this.app.ctx;
+                const canvas = this.app.canvas;
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Set transform
+                ctx.save();
+                ctx.translate(this.app.transform.x, this.app.transform.y);
+                ctx.scale(this.app.transform.scale, this.app.transform.scale);
+                
+                // Draw grid (optional)
+                this.drawGrid();
+                
+                // Draw tiles
+                this.drawVisibleTiles();
+                
+                ctx.restore();
+            }
+            
+            drawGrid() {
+                const ctx = this.app.ctx;
+                const viewport = this.app.tileManager.getViewport();
+                
+                ctx.strokeStyle = '#f0f0f0';
+                ctx.lineWidth = 1 / this.app.transform.scale;
+                
+                // Draw tile boundaries
+                const startX = Math.floor(viewport.left / TILE_SIZE) * TILE_SIZE;
+                const endX = Math.ceil(viewport.right / TILE_SIZE) * TILE_SIZE;
+                const startY = Math.floor(viewport.top / TILE_SIZE) * TILE_SIZE;
+                const endY = Math.ceil(viewport.bottom / TILE_SIZE) * TILE_SIZE;
+                
+                ctx.beginPath();
+                for (let x = startX; x <= endX; x += TILE_SIZE) {
+                    ctx.moveTo(x, viewport.top);
+                    ctx.lineTo(x, viewport.bottom);
+                }
+                for (let y = startY; y <= endY; y += TILE_SIZE) {
+                    ctx.moveTo(viewport.left, y);
+                    ctx.lineTo(viewport.right, y);
+                }
+                ctx.stroke();
+            }
+            
+            drawVisibleTiles() {
+                const visibleTiles = this.app.tileManager.getVisibleTiles();
+                
+                for (const tile of visibleTiles) {
+                    const strokes = this.app.tileManager.getTile(tile.x, tile.y);
+                    for (const stroke of strokes) {
+                        this.drawSingleStroke(stroke);
+                    }
+                }
+            }
+            
+            drawStroke(stroke) {
+                // Add to buffer for next render
+                this.strokeBuffer.push(stroke);
+            }
+            
+            drawBufferedStrokes() {
+                const ctx = this.app.ctx;
+                
+                ctx.save();
+                ctx.translate(this.app.transform.x, this.app.transform.y);
+                ctx.scale(this.app.transform.scale, this.app.transform.scale);
+                
+                for (const stroke of this.strokeBuffer) {
+                    this.drawSingleStroke(stroke);
+                }
+                
+                ctx.restore();
+            }
+            
+            drawSingleStroke(stroke) {
+                const ctx = this.app.ctx;
+                
+                ctx.fillStyle = stroke.color;
+                ctx.beginPath();
+                ctx.arc(stroke.x, stroke.y, stroke.size / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            clearView() {
+                // Clear only the visible area, not the entire canvas data
+                this.needsRedraw = true;
+            }
+        }
+
+        // Initialize the application
+        let app;
         
-        // Initialize when page loads
-        window.addEventListener('load', () => {
-            console.log('🚀 Starting Epic Whiteboard...');
-            new EpicWhiteboard();
+        document.addEventListener('DOMContentLoaded', () => {
+            app = new WhiteboardApp();
+        });
+
+        // Handle visibility changes for performance
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // App is hidden, reduce activity
+                if (app && app.networkManager) {
+                    app.networkManager.stopPing();
+                }
+            } else {
+                // App is visible, resume activity
+                if (app && app.networkManager && app.networkManager.isConnected) {
+                    app.networkManager.startPing();
+                }
+            }
         });
     </script>
 </body>
