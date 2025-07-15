@@ -1,997 +1,375 @@
-simulateMultiplayer() {
-                this.demoMode = true;
-                
-                // Demo mode with simulated players
-                for (let i = 0; i < 12; i++) {
-                    const player = {
-                        id: `demo_${i}`,
-                        name: this.generateName(),
-                        color: this.generatePlayerColor(),
-                        x: Math.random() * this.canvas.width * 3,
-                        y: Math.random() * this.canvas.height * 3,
-                        lastSeen: Date.now()
-                    };
-                    this.players.set(player.id, player);
-                }
-                
-                this.updatePlayerCount();
-                
-                // Simulate activity
-                setInterval(() => {
-                    this.players.forEach(player => {
-                        if (player.id.startsWith('demo_')) {
-                            // Random movement
-                            player.x += (Math.random() - 0.5) * 200;
-                            player.y += (Math.random() - 0.5) * 200;
-                            player.x = Math.max(0, Math.min(player.x, this.canvas.width * 3));
-                            player.y = Math.max(0, Math.min(player.y, this.canvas.height * 3));
-                            
-                            // Random drawing
-                            if (Math.random() < 0.08<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Global Canvas - Draw with the World</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Whiteboard</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            user-select: none;
-        }
-        
-        #canvas {
-            background: #ffffff;
-            cursor: crosshair;
-            position: absolute;
-            top: 0;
-            left: 0;
-            touch-action: none;
-        }
-        
-        #ui {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 100;
-        }
-        
-        .panel {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 16px;
-            color: white;
-            pointer-events: auto;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        #toolbar {
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
             display: flex;
-            gap: 12px;
+            flex-direction: column;
             align-items: center;
-            flex-wrap: wrap;
-            justify-content: center;
         }
         
-        #info {
-            top: 20px;
-            right: 20px;
-            text-align: right;
-            font-size: 14px;
-            min-width: 150px;
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
         }
         
-        #controls {
-            top: 20px;
-            left: 20px;
-            font-size: 12px;
-            opacity: 0.9;
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .color-picker {
+            display: flex;
+            gap: 5px;
         }
         
         .color-btn {
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ddd;
             border-radius: 50%;
-            border: 3px solid white;
             cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
+            transition: transform 0.2s;
         }
         
         .color-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
         }
         
         .color-btn.active {
-            transform: scale(1.2);
-            border-width: 4px;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            border-color: #333;
+            border-width: 3px;
         }
         
-        .size-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 12px;
-            color: white;
-            padding: 8px 16px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 600;
-            font-size: 14px;
+        .brush-size {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         
-        .size-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-        
-        .size-btn.active {
-            background: white;
-            color: #667eea;
-            transform: translateY(-2px);
+        .brush-size input {
+            width: 100px;
         }
         
         .clear-btn {
-            background: linear-gradient(45deg, #ff416c, #ff4b2b);
-            border: none;
-            border-radius: 12px;
+            background: #ff4757;
             color: white;
+            border: none;
             padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s ease;
+            font-weight: bold;
         }
         
         .clear-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(255, 65, 108, 0.4);
+            background: #ff3742;
         }
         
-        .player-cursor {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid white;
-            pointer-events: none;
-            z-index: 50;
-            transition: all 0.1s ease;
-            animation: pulse 2s infinite;
+        .canvas-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        #whiteboard {
+            border: none;
+            display: block;
+            cursor: crosshair;
         }
         
-        .player-name {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
-            white-space: nowrap;
-            font-weight: 600;
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
-        .stroke-trail {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: trailFade 1.5s ease-out forwards;
+        .status.connected {
+            color: #2ed573;
         }
         
-        @keyframes trailFade {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0);
-            }
+        .status.disconnected {
+            color: #ff4757;
         }
         
-        #connectionStatus {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            pointer-events: auto;
-        }
-        
-        .status-connected {
-            background: rgba(34, 197, 94, 0.8);
-        }
-        
-        .status-disconnected {
-            background: rgba(239, 68, 68, 0.8);
-        }
-        
-        .rainbow {
-            background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080);
-            background-size: 400% 400%;
-            animation: rainbowShift 3s ease infinite;
-        }
-        
-        @keyframes rainbowShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-        
-        @media (max-width: 768px) {
-            .panel {
-                padding: 12px;
-                border-radius: 12px;
-            }
-            
-            #toolbar {
-                bottom: 10px;
-                gap: 8px;
-            }
-            
-            .color-btn {
-                width: 35px;
-                height: 35px;
-            }
-            
-            .size-btn {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-            
-            #info {
-                font-size: 12px;
-                min-width: 120px;
-            }
-            
-            #controls {
-                font-size: 10px;
-            }
-        }
-        
-        .notification {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 20px 30px;
-            border-radius: 16px;
-            font-size: 18px;
-            font-weight: 600;
-            text-align: center;
-            z-index: 200;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .notification.show {
-            opacity: 1;
-        }
-        
-        .canvas-bg {
-            background-image: 
-                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-                radial-gradient(circle at 75% 75%, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
+        .users-count {
+            font-weight: bold;
+            color: #5352ed;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas" class="canvas-bg"></canvas>
+    <div class="header">
+        <h1>🎨 Global Whiteboard</h1>
+        <p>Draw together with people from around the world!</p>
+    </div>
     
-    <div id="ui">
-        <div id="controls" class="panel">
-            <div><strong>🎨 Global Canvas</strong></div>
-            <div style="margin-top: 8px; font-size: 10px; opacity: 0.8;">
-                <div>• Click/tap and drag to draw</div>
-                <div>• WASD or arrows to move</div>
-                <div>• Scroll/pinch to zoom</div>
-                <div>• Space to jump randomly</div>
-            </div>
-        </div>
-        
-        <div id="info" class="panel">
-            <div><strong>👥 <span id="playerCount">1</span> online</strong></div>
-            <div style="margin-top: 8px;">
-                <div>Your strokes: <span id="myStrokes">0</span></div>
-                <div>Total strokes: <span id="totalStrokes">0</span></div>
-                <div style="margin-top: 4px; font-size: 12px; opacity: 0.8;">
-                    Position: <span id="position">0, 0</span>
-                </div>
-            </div>
-        </div>
-        
-        <div id="toolbar" class="panel">
-            <!-- Colors -->
+    <div class="toolbar">
+        <div class="color-picker">
             <div class="color-btn active" style="background: #000000" data-color="#000000"></div>
-            <div class="color-btn" style="background: #ff0000" data-color="#ff0000"></div>
-            <div class="color-btn" style="background: #00ff00" data-color="#00ff00"></div>
-            <div class="color-btn" style="background: #0000ff" data-color="#0000ff"></div>
-            <div class="color-btn" style="background: #ffff00" data-color="#ffff00"></div>
-            <div class="color-btn" style="background: #ff00ff" data-color="#ff00ff"></div>
-            <div class="color-btn" style="background: #00ffff" data-color="#00ffff"></div>
-            <div class="color-btn rainbow" data-color="rainbow"></div>
-            
-            <!-- Brush sizes -->
-            <div class="size-btn active" data-size="3">Small</div>
-            <div class="size-btn" data-size="8">Medium</div>
-            <div class="size-btn" data-size="15">Large</div>
-            <div class="size-btn" data-size="25">Huge</div>
-            
-            <!-- Clear button -->
-            <button class="clear-btn" onclick="clearCanvas()">Clear My Art</button>
+            <div class="color-btn" style="background: #ff4757" data-color="#ff4757"></div>
+            <div class="color-btn" style="background: #2ed573" data-color="#2ed573"></div>
+            <div class="color-btn" style="background: #5352ed" data-color="#5352ed"></div>
+            <div class="color-btn" style="background: #ffa502" data-color="#ffa502"></div>
+            <div class="color-btn" style="background: #ff6b81" data-color="#ff6b81"></div>
+            <div class="color-btn" style="background: #70a1ff" data-color="#70a1ff"></div>
+            <div class="color-btn" style="background: #7bed9f" data-color="#7bed9f"></div>
         </div>
         
-        <div id="connectionStatus">
-            <span id="status">Connecting...</span>
+        <div class="brush-size">
+            <label>Brush Size:</label>
+            <input type="range" id="brushSize" min="1" max="20" value="3">
+            <span id="brushSizeValue">3px</span>
         </div>
+        
+        <button class="clear-btn" id="clearBtn">Clear Board</button>
+    </div>
+    
+    <div class="canvas-container">
+        <canvas id="whiteboard" width="800" height="600"></canvas>
+    </div>
+    
+    <div class="status disconnected" id="status">
+        Connecting to server...
+        <span class="users-count" id="usersCount"></span>
     </div>
 
     <script>
-        class GlobalCanvas {
+        class WhiteboardGame {
             constructor() {
-                this.canvas = document.getElementById('canvas');
+                this.canvas = document.getElementById('whiteboard');
                 this.ctx = this.canvas.getContext('2d');
-                this.resizeCanvas();
-                
-                // Connection
-                this.ws = null;
-                this.playerId = this.generateId();
-                this.reconnectAttempts = 0;
-                this.maxReconnectAttempts = 5;
-                
-                // Game state
-                this.players = new Map();
-                this.strokes = [];
-                this.myStrokes = 0;
-                
-                // Drawing state
                 this.isDrawing = false;
                 this.currentColor = '#000000';
                 this.currentSize = 3;
-                this.lastDrawPoint = null;
-                this.rainbowHue = 0;
+                this.lastX = 0;
+                this.lastY = 0;
                 
-                // Camera
-                this.camera = { 
-                    x: 0, 
-                    y: 0, 
-                    zoom: 1,
-                    targetX: 0,
-                    targetY: 0
-                };
+                this.ws = null;
+                this.isConnected = false;
+                this.usersCount = 0;
                 
-                // Input
-                this.keys = {};
-                this.mouse = { x: 0, y: 0 };
-                
-                // Player info
-                this.playerName = this.generateName();
-                this.playerColor = this.generatePlayerColor();
-                
-                this.setupEventListeners();
-                this.connectWebSocket();
-                this.startGameLoop();
-                
-                this.showNotification(`Welcome ${this.playerName}! 🎨`);
+                this.setupCanvas();
+                this.setupUI();
+                this.connectToServer();
             }
             
-            generateId() {
-                return 'p_' + Math.random().toString(36).substr(2, 8) + Date.now().toString(36);
+            setupCanvas() {
+                this.ctx.lineCap = 'round';
+                this.ctx.lineJoin = 'round';
+                
+                // Mouse events
+                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+                this.canvas.addEventListener('mousemove', this.draw.bind(this));
+                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+                
+                // Touch events for mobile
+                this.canvas.addEventListener('touchstart', this.handleTouch.bind(this));
+                this.canvas.addEventListener('touchmove', this.handleTouch.bind(this));
+                this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
             }
             
-            generateName() {
-                const adjectives = ['Creative', 'Artistic', 'Colorful', 'Wild', 'Happy', 'Cool', 'Epic', 'Super'];
-                const nouns = ['Artist', 'Painter', 'Drawer', 'Creator', 'Sketcher', 'Doodler', 'Maestro', 'Genius'];
-                return `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]}`;
-            }
-            
-            generatePlayerColor() {
-                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3', '#54a0ff', '#5f27cd'];
-                return colors[Math.floor(Math.random() * colors.length)];
-            }
-            
-            resizeCanvas() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-                this.redrawCanvas();
-            }
-            
-            setupEventListeners() {
-                // Resize
-                window.addEventListener('resize', () => this.resizeCanvas());
-                
-                // Drawing - Mouse
-                this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
-                this.canvas.addEventListener('mousemove', (e) => this.draw(e));
-                this.canvas.addEventListener('mouseup', () => this.stopDrawing());
-                this.canvas.addEventListener('mouseout', () => this.stopDrawing());
-                
-                // Drawing - Touch
-                this.canvas.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    this.startDrawing({
-                        clientX: touch.clientX,
-                        clientY: touch.clientY
-                    });
-                }, { passive: false });
-                
-                this.canvas.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    if (e.touches.length === 1) {
-                        const touch = e.touches[0];
-                        this.draw({
-                            clientX: touch.clientX,
-                            clientY: touch.clientY
-                        });
-                    } else if (e.touches.length === 2) {
-                        this.handlePinchZoom(e);
-                    }
-                }, { passive: false });
-                
-                this.canvas.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    this.stopDrawing();
-                }, { passive: false });
-                
-                // Mouse tracking for cursor
-                this.canvas.addEventListener('mousemove', (e) => {
-                    const rect = this.canvas.getBoundingClientRect();
-                    this.mouse.x = e.clientX - rect.left;
-                    this.mouse.y = e.clientY - rect.top;
-                    this.sendMousePosition();
-                });
-                
-                // Zoom
-                this.canvas.addEventListener('wheel', (e) => {
-                    e.preventDefault();
-                    this.handleZoom(e);
-                }, { passive: false });
-                
-                // Keyboard
-                document.addEventListener('keydown', (e) => this.handleKeyDown(e));
-                document.addEventListener('keyup', (e) => this.handleKeyUp(e));
-                
-                // UI Controls
-                this.setupUIControls();
-                
-                // Prevent context menu
-                this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-            }
-            
-            setupUIControls() {
-                // Color buttons
+            setupUI() {
+                // Color picker
                 document.querySelectorAll('.color-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
-                        document.querySelector('.color-btn.active')?.classList.remove('active');
+                        document.querySelector('.color-btn.active').classList.remove('active');
                         btn.classList.add('active');
                         this.currentColor = btn.dataset.color;
                     });
                 });
                 
-                // Size buttons
-                document.querySelectorAll('.size-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        document.querySelector('.size-btn.active')?.classList.remove('active');
-                        btn.classList.add('active');
-                        this.currentSize = parseInt(btn.dataset.size);
+                // Brush size
+                const brushSize = document.getElementById('brushSize');
+                const brushSizeValue = document.getElementById('brushSizeValue');
+                
+                brushSize.addEventListener('input', () => {
+                    this.currentSize = brushSize.value;
+                    brushSizeValue.textContent = `${brushSize.value}px`;
+                });
+                
+                // Clear button
+                document.getElementById('clearBtn').addEventListener('click', () => {
+                    this.clearCanvas();
+                    this.sendMessage({
+                        type: 'clear'
                     });
                 });
             }
             
-            connectWebSocket() {
-                // Connect to your Cloudflare Worker backend
-                const wsUrl = 'wss://whiteboardbackend.lolbiggerestlol.workers.dev/';
-                
+            connectToServer() {
                 try {
-                    this.updateStatus('Connecting to Global Canvas...', 'disconnected');
-                    this.ws = new WebSocket(wsUrl);
-                    
-                    // Set a connection timeout
-                    const connectionTimeout = setTimeout(() => {
-                        console.log('Connection timeout, switching to demo mode');
-                        this.ws.close();
-                        this.updateStatus('Demo Mode - Connection Timeout', 'disconnected');
-                        this.simulateMultiplayer();
-                    }, 3000);
+                    this.ws = new WebSocket('wss://whiteboardbackend.lolbiggesstlol.workers.dev/');
                     
                     this.ws.onopen = () => {
-                        clearTimeout(connectionTimeout);
-                        console.log('Connected to Global Canvas');
-                        this.updateStatus('Connected to Global Server', 'connected');
-                        this.reconnectAttempts = 0;
-                        
-                        // Send initial player data
-                        this.sendMessage({
-                            type: 'join',
-                            player: {
-                                id: this.playerId,
-                                name: this.playerName,
-                                color: this.playerColor,
-                                x: this.mouse.x,
-                                y: this.mouse.y
-                            }
-                        });
+                        this.isConnected = true;
+                        this.updateStatus('Connected to global whiteboard');
+                        console.log('Connected to whiteboard server');
                     };
                     
                     this.ws.onmessage = (event) => {
                         const data = JSON.parse(event.data);
-                        this.handleMessage(data);
+                        this.handleServerMessage(data);
                     };
                     
                     this.ws.onclose = () => {
-                        clearTimeout(connectionTimeout);
-                        console.log('Disconnected from Global Canvas');
-                        this.updateStatus('Demo Mode - Server Offline', 'disconnected');
-                        if (!this.demoMode) {
-                            this.simulateMultiplayer();
-                        }
+                        this.isConnected = false;
+                        this.updateStatus('Disconnected from server');
+                        console.log('Disconnected from server');
+                        
+                        // Attempt to reconnect after 3 seconds
+                        setTimeout(() => {
+                            this.connectToServer();
+                        }, 3000);
                     };
                     
                     this.ws.onerror = (error) => {
-                        clearTimeout(connectionTimeout);
-                        console.log('WebSocket error, switching to demo mode');
-                        this.updateStatus('Demo Mode - Connection Error', 'disconnected');
-                        if (!this.demoMode) {
-                            this.simulateMultiplayer();
-                        }
+                        console.error('WebSocket error:', error);
+                        this.updateStatus('Connection error');
                     };
                     
                 } catch (error) {
-                    console.log('WebSocket not available, running in demo mode');
-                    this.updateStatus('Demo Mode - WebSocket Not Supported', 'disconnected');
-                    this.simulateMultiplayer();
+                    console.error('Failed to connect:', error);
+                    this.updateStatus('Failed to connect to server');
                 }
             }
             
-            attemptReconnect() {
-                if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                    this.reconnectAttempts++;
-                    this.updateStatus(`Reconnecting... (${this.reconnectAttempts})`, 'disconnected');
-                    setTimeout(() => this.connectWebSocket(), 2000 * this.reconnectAttempts);
-                } else {
-                    this.updateStatus('Offline Mode', 'disconnected');
-                    this.simulateMultiplayer();
-                }
-            }
-            
-            simulateMultiplayer() {
-                // Demo mode with simulated players
-                for (let i = 0; i < 8; i++) {
-                    const player = {
-                        id: `demo_${i}`,
-                        name: this.generateName(),
-                        color: this.generatePlayerColor(),
-                        x: Math.random() * this.canvas.width,
-                        y: Math.random() * this.canvas.height,
-                        lastSeen: Date.now()
-                    };
-                    this.players.set(player.id, player);
-                }
-                
-                // Simulate activity
-                setInterval(() => {
-                    this.players.forEach(player => {
-                        if (player.id.startsWith('demo_')) {
-                            // Random movement
-                            player.x += (Math.random() - 0.5) * 100;
-                            player.y += (Math.random() - 0.5) * 100;
-                            player.x = Math.max(0, Math.min(player.x, this.canvas.width));
-                            player.y = Math.max(0, Math.min(player.y, this.canvas.height));
-                            
-                            // Random drawing
-                            if (Math.random() < 0.05) {
-                                this.simulateStroke(player);
-                            }
-                        }
-                    });
-                    this.updatePlayerCount();
-                }, 500);
-            }
-            
-            simulateStroke(player) {
-                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-                const stroke = {
-                    id: Date.now() + Math.random(),
-                    playerId: player.id,
-                    x1: player.x + (Math.random() - 0.5) * 100,
-                    y1: player.y + (Math.random() - 0.5) * 100,
-                    x2: player.x + (Math.random() - 0.5) * 100,
-                    y2: player.y + (Math.random() - 0.5) * 100,
-                    color: colors[Math.floor(Math.random() * colors.length)],
-                    size: Math.random() * 10 + 3,
-                    timestamp: Date.now()
-                };
-                
-                this.addStroke(stroke);
-                this.createTrailEffect(stroke.x2, stroke.y2, stroke.color);
-            }
-            
-            sendMessage(data) {
-                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                    this.ws.send(JSON.stringify(data));
-                }
-            }
-            
-            handleMessage(data) {
+            handleServerMessage(data) {
                 switch (data.type) {
-                    case 'stroke':
-                        this.addStroke(data.stroke);
-                        if (data.stroke.playerId !== this.playerId) {
-                            this.createTrailEffect(data.stroke.x2, data.stroke.y2, data.stroke.color);
-                        }
+                    case 'draw':
+                        this.drawRemoteLine(data);
                         break;
-                    case 'player_join':
-                        this.players.set(data.player.id, data.player);
-                        this.updatePlayerCount();
+                    case 'clear':
+                        this.clearCanvas();
                         break;
-                    case 'player_leave':
-                        this.players.delete(data.playerId);
-                        this.updatePlayerCount();
+                    case 'users_count':
+                        this.usersCount = data.count;
+                        this.updateUsersCount();
                         break;
-                    case 'player_move':
-                        if (this.players.has(data.playerId)) {
-                            const player = this.players.get(data.playerId);
-                            player.x = data.x;
-                            player.y = data.y;
-                            player.lastSeen = Date.now();
-                        }
-                        break;
-                    case 'canvas_clear':
-                        if (data.playerId !== this.playerId) {
-                            this.strokes = [];
-                            this.redrawCanvas();
-                        }
+                    case 'canvas_state':
+                        this.loadCanvasState(data.lines);
                         break;
                 }
-            }
-            
-            sendMousePosition() {
-                if (Date.now() - (this.lastMouseSend || 0) > 100) { // Throttle
-                    this.sendMessage({
-                        type: 'player_move',
-                        playerId: this.playerId,
-                        x: this.mouse.x + this.camera.x,
-                        y: this.mouse.y + this.camera.y
-                    });
-                    this.lastMouseSend = Date.now();
-                }
-            }
-            
-            getWorldPos(clientX, clientY) {
-                const rect = this.canvas.getBoundingClientRect();
-                return {
-                    x: (clientX - rect.left) / this.camera.zoom + this.camera.x,
-                    y: (clientY - rect.top) / this.camera.zoom + this.camera.y
-                };
             }
             
             startDrawing(e) {
                 this.isDrawing = true;
-                const pos = this.getWorldPos(e.clientX, e.clientY);
-                this.lastDrawPoint = pos;
+                [this.lastX, this.lastY] = this.getMousePos(e);
             }
             
             draw(e) {
                 if (!this.isDrawing) return;
                 
-                const pos = this.getWorldPos(e.clientX, e.clientY);
+                const [currentX, currentY] = this.getMousePos(e);
                 
-                if (this.lastDrawPoint) {
-                    const color = this.currentColor === 'rainbow' ? this.getRainbowColor() : this.currentColor;
-                    
-                    const stroke = {
-                        id: Date.now() + Math.random(),
-                        playerId: this.playerId,
-                        x1: this.lastDrawPoint.x,
-                        y1: this.lastDrawPoint.y,
-                        x2: pos.x,
-                        y2: pos.y,
-                        color: color,
-                        size: this.currentSize,
-                        timestamp: Date.now()
-                    };
-                    
-                    this.addStroke(stroke);
-                    this.sendMessage({ type: 'stroke', stroke: stroke });
-                    
-                    this.myStrokes++;
-                    this.updateStrokeCount();
-                    
-                    this.createTrailEffect(pos.x, pos.y, color);
-                }
+                this.drawLine(this.lastX, this.lastY, currentX, currentY, this.currentColor, this.currentSize);
                 
-                this.lastDrawPoint = pos;
+                // Send drawing data to server
+                this.sendMessage({
+                    type: 'draw',
+                    fromX: this.lastX,
+                    fromY: this.lastY,
+                    toX: currentX,
+                    toY: currentY,
+                    color: this.currentColor,
+                    size: this.currentSize
+                });
+                
+                [this.lastX, this.lastY] = [currentX, currentY];
             }
             
             stopDrawing() {
                 this.isDrawing = false;
-                this.lastDrawPoint = null;
             }
             
-            getRainbowColor() {
-                this.rainbowHue = (this.rainbowHue + 5) % 360;
-                return `hsl(${this.rainbowHue}, 80%, 60%)`;
+            handleTouch(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                                e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                    clientX: touch.clientX,
+                    clientY: touch.clientY
+                });
+                this.canvas.dispatchEvent(mouseEvent);
             }
             
-            addStroke(stroke) {
-                this.strokes.push(stroke);
-                this.drawStroke(stroke);
-                
-                // Keep only recent strokes for performance
-                if (this.strokes.length > 10000) {
-                    this.strokes = this.strokes.slice(-8000);
-                    this.redrawCanvas();
-                }
-            }
-            
-            drawStroke(stroke) {
-                this.ctx.save();
-                this.ctx.scale(this.camera.zoom, this.camera.zoom);
-                this.ctx.translate(-this.camera.x, -this.camera.y);
-                
-                this.ctx.strokeStyle = stroke.color;
-                this.ctx.lineWidth = stroke.size;
-                this.ctx.lineCap = 'round';
-                this.ctx.lineJoin = 'round';
-                
-                // Add glow effect for rainbow
-                if (stroke.color.startsWith('hsl')) {
-                    this.ctx.shadowColor = stroke.color;
-                    this.ctx.shadowBlur = 10;
-                } else {
-                    this.ctx.shadowBlur = 0;
-                }
-                
-                this.ctx.beginPath();
-                this.ctx.moveTo(stroke.x1, stroke.y1);
-                this.ctx.lineTo(stroke.x2, stroke.y2);
-                this.ctx.stroke();
-                
-                this.ctx.restore();
-            }
-            
-            createTrailEffect(x, y, color) {
-                const trail = document.createElement('div');
-                trail.className = 'stroke-trail';
-                trail.style.left = (x - this.camera.x) * this.camera.zoom - 3 + 'px';
-                trail.style.top = (y - this.camera.y) * this.camera.zoom - 3 + 'px';
-                trail.style.background = color;
-                document.getElementById('ui').appendChild(trail);
-                
-                setTimeout(() => trail.remove(), 1500);
-            }
-            
-            redrawCanvas() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.strokes.forEach(stroke => this.drawStroke(stroke));
-            }
-            
-            handleKeyDown(e) {
-                this.keys[e.key.toLowerCase()] = true;
-                
-                if (e.key === ' ') {
-                    e.preventDefault();
-                    this.teleportRandom();
-                }
-            }
-            
-            handleKeyUp(e) {
-                this.keys[e.key.toLowerCase()] = false;
-            }
-            
-            handleZoom(e) {
-                const zoomSpeed = 0.1;
+            getMousePos(e) {
                 const rect = this.canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
+                return [
+                    e.clientX - rect.left,
+                    e.clientY - rect.top
+                ];
+            }
+            
+            drawLine(fromX, fromY, toX, toY, color, size) {
+                this.ctx.strokeStyle = color;
+                this.ctx.lineWidth = size;
+                this.ctx.beginPath();
+                this.ctx.moveTo(fromX, fromY);
+                this.ctx.lineTo(toX, toY);
+                this.ctx.stroke();
+            }
+            
+            drawRemoteLine(data) {
+                this.drawLine(data.fromX, data.fromY, data.toX, data.toY, data.color, data.size);
+            }
+            
+            clearCanvas() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+            
+            loadCanvasState(lines) {
+                this.clearCanvas();
+                lines.forEach(line => {
+                    this.drawLine(line.fromX, line.fromY, line.toX, line.toY, line.color, line.size);
+                });
+            }
+            
+            sendMessage(message) {
+                if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify(message));
+                }
+            }
+            
+            updateStatus(message) {
+                const status = document.getElementById('status');
+                status.textContent = message + ' ';
+                status.className = this.isConnected ? 'status connected' : 'status disconnected';
                 
-                const oldZoom = this.camera.zoom;
-                
-                if (e.deltaY < 0) {
-                    this.camera.zoom = Math.min(this.camera.zoom + zoomSpeed, 3);
+                const usersSpan = document.getElementById('usersCount');
+                status.appendChild(usersSpan);
+                this.updateUsersCount();
+            }
+            
+            updateUsersCount() {
+                const usersSpan = document.getElementById('usersCount');
+                if (this.usersCount > 0) {
+                    usersSpan.textContent = `(${this.usersCount} user${this.usersCount === 1 ? '' : 's'} online)`;
                 } else {
-                    this.camera.zoom = Math.max(this.camera.zoom - zoomSpeed, 0.2);
+                    usersSpan.textContent = '';
                 }
-                
-                // Zoom towards mouse position
-                const scale = this.camera.zoom / oldZoom;
-                this.camera.x += (mouseX / oldZoom - mouseX / this.camera.zoom);
-                this.camera.y += (mouseY / oldZoom - mouseY / this.camera.zoom);
-                
-                this.redrawCanvas();
-            }
-            
-            handlePinchZoom(e) {
-                const touch1 = e.touches[0];
-                const touch2 = e.touches[1];
-                const distance = Math.sqrt(
-                    Math.pow(touch2.clientX - touch1.clientX, 2) +
-                    Math.pow(touch2.clientY - touch1.clientY, 2)
-                );
-                
-                if (this.lastPinchDistance) {
-                    const scale = distance / this.lastPinchDistance;
-                    this.camera.zoom *= scale;
-                    this.camera.zoom = Math.max(0.2, Math.min(3, this.camera.zoom));
-                    this.redrawCanvas();
-                }
-                
-                this.lastPinchDistance = distance;
-            }
-            
-            handleMovement() {
-                const speed = 300 / this.camera.zoom;
-                let moved = false;
-                
-                if (this.keys['w'] || this.keys['arrowup']) {
-                    this.camera.y -= speed;
-                    moved = true;
-                }
-                if (this.keys['s'] || this.keys['arrowdown']) {
-                    this.camera.y += speed;
-                    moved = true;
-                }
-                if (this.keys['a'] || this.keys['arrowleft']) {
-                    this.camera.x -= speed;
-                    moved = true;
-                }
-                if (this.keys['d'] || this.keys['arrowright']) {
-                    this.camera.x += speed;
-                    moved = true;
-                }
-                
-                if (moved) {
-                    this.redrawCanvas();
-                    this.updatePosition();
-                }
-            }
-            
-            teleportRandom() {
-                if (this.strokes.length > 0) {
-                    const randomStroke = this.strokes[Math.floor(Math.random() * this.strokes.length)];
-                    this.camera.x = randomStroke.x1 - this.canvas.width / 2;
-                    this.camera.y = randomStroke.y1 - this.canvas.height / 2;
-                    this.redrawCanvas();
-                    this.showNotification('🎯 Jumped to random art!');
-                }
-            }
-            
-            updateStatus(text, status) {
-                const statusEl = document.getElementById('status');
-                const containerEl = document.getElementById('connectionStatus');
-                statusEl.textContent = text;
-                containerEl.className = `status-${status}`;
-            }
-            
-            updatePlayerCount() {
-                document.getElementById('playerCount').textContent = this.players.size + 1;
-            }
-            
-            updateStrokeCount() {
-                document.getElementById('myStrokes').textContent = this.myStrokes;
-                document.getElementById('totalStrokes').textContent = this.strokes.length;
-            }
-            
-            updatePosition() {
-                const x = Math.round(this.camera.x + this.canvas.width / 2);
-                const y = Math.round(this.camera.y + this.canvas.height / 2);
-                document.getElementById('position').textContent = `${x}, ${y}`;
-            }
-            
-            showNotification(text) {
-                const notification = document.createElement('div');
-                notification.className = 'notification';
-                notification.textContent = text;
-                document.getElementById('ui').appendChild(notification);
-                
-                setTimeout(() => notification.classList.add('show'), 100);
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                    setTimeout(() => notification.remove(), 300);
-                }, 2000);
-            }
-            
-            render() {
-                this.drawPlayers();
-            }
-            
-            drawPlayers() {
-                // Clear previous player cursors
-                document.querySelectorAll('.player-cursor').forEach(el => el.remove());
-                
-                this.players.forEach(player => {
-                    if (Date.now() - player.lastSeen < 5000) { // Only show recent players
-                        const screenX = (player.x - this.camera.x) * this.camera.zoom;
-                        const screenY = (player.y - this.camera.y) * this.camera.zoom;
-                        
-                        if (screenX >= -50 && screenX <= this.canvas.width + 50 &&
-                            screenY >= -50 && screenY <= this.canvas.height + 50) {
-                            
-                            const cursor = document.createElement('div');
-                            cursor.className = 'player-cursor';
-                            cursor.style.left = screenX - 10 + 'px';
-                            cursor.style.top = screenY - 10 + 'px';
-                            cursor.style.backgroundColor = player.color;
-                            
-                            const name = document.createElement('div');
-                            name.className = 'player-name';
-                            name.textContent = player.name;
-                            cursor.appendChild(name);
-                            
-                            document.getElementById('ui').appendChild(cursor);
-                        }
-                    }
-                });
-            }
-            
-            startGameLoop() {
-                const gameLoop = () => {
-                    this.handleMovement();
-                    this.render();
-                    requestAnimationFrame(gameLoop);
-                };
-                requestAnimationFrame(gameLoop);
             }
         }
         
-        // Global functions
-        function clearCanvas() {
-            if (confirm('Clear all your drawings? This cannot be undone!')) {
-                // Only clear strokes by current player
-                globalCanvas.strokes = globalCanvas.strokes.filter(s => s.playerId !== globalCanvas.playerId);
-                globalCanvas.myStrokes = 0;
-                globalCanvas.redrawCanvas();
-                globalCanvas.updateStrokeCount();
-                globalCanvas.showNotification('🗑️ Your art cleared!');
-                
-                globalCanvas.sendMessage({
-                    type: 'canvas_clear',
-                    playerId: globalCanvas.playerId
-                });
-            }
-        }
-        
-        // Initialize
-        let globalCanvas;
+        // Initialize the whiteboard game when the page loads
         window.addEventListener('load', () => {
-            globalCanvas = new GlobalCanvas();
-            console.log('🎨 Global Canvas initialized!');
+            new WhiteboardGame();
         });
     </script>
 </body>
