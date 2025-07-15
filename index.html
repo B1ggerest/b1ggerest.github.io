@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coming Soon</title>
+    <title>Email Alias Manager</title>
     <style>
         * {
             margin: 0;
@@ -12,278 +12,619 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            overflow: hidden;
+            padding: 20px;
         }
 
         .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            min-height: 500px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
             text-align: center;
-            padding: 2rem;
-            max-width: 600px;
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            animation: fadeInUp 1s ease-out;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
         }
 
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            margin: 0 auto 2rem;
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* Login Form Styles */
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"], input[type="email"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="email"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .user-info {
+            color: #666;
+        }
+
+        .aliases-section {
+            margin-bottom: 40px;
+        }
+
+        .aliases-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .alias-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .alias-info {
+            flex: 1;
+        }
+
+        .alias-email {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .alias-destination {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .alias-date {
+            color: #999;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .add-alias-form {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+            min-width: 200px;
+        }
+
+        .domain-suffix {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: bold;
-            animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
+        .domain-suffix input {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-right: none;
         }
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-
-        .email-form {
-            margin: 2rem 0;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 1rem;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        input[type="email"] {
-            flex: 1;
-            padding: 15px 20px;
-            border: none;
-            border-radius: 50px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        input[type="email"]:focus {
-            background: rgba(255, 255, 255, 1);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .notify-btn {
-            padding: 15px 30px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50px;
-            color: white;
-            font-size: 1rem;
+        .domain-suffix .suffix {
+            background: #e9ecef;
+            border: 2px solid #e1e5e9;
+            border-left: none;
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+            padding: 15px;
+            color: #666;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .notify-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        /* Alert Styles */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
         }
 
-        .social-links {
-            margin-top: 2rem;
+        .alert-error {
+            background: #fee;
+            border-color: #f56565;
+            color: #c53030;
         }
 
-        .social-link {
-            display: inline-block;
-            margin: 0 10px;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            width: 50px;
-            height: 50px;
-            line-height: 26px;
-            text-align: center;
+        .alert-success {
+            background: #f0fff4;
+            border-color: #48bb78;
+            color: #2f855a;
         }
 
-        .social-link:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-3px);
-        }
-
-        .particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .loading {
+            opacity: 0.6;
             pointer-events: none;
-            z-index: -1;
         }
 
-        .particle {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
         }
 
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(180deg);
-            }
+        .empty-state h4 {
+            margin-bottom: 10px;
+            color: #333;
         }
 
+        /* Responsive Design */
         @media (max-width: 768px) {
             .container {
-                margin: 1rem;
-                padding: 1.5rem;
+                margin: 10px;
+                border-radius: 8px;
             }
 
-            h1 {
-                font-size: 2.5rem;
+            .header {
+                padding: 20px;
             }
 
-            .input-group {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .form-row {
                 flex-direction: column;
             }
 
-            .notify-btn {
-                width: 100%;
+            .form-row .form-group {
+                min-width: auto;
+            }
+
+            .alias-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
             }
         }
     </style>
 </head>
 <body>
-    <div class="particles"></div>
-    
     <div class="container">
-        <div class="logo">
-            ✨
+        <div class="header">
+            <h1>📧 Email Alias Manager</h1>
+            <p>Manage your email aliases with ease</p>
         </div>
-        
-        <h1>Coming Soon</h1>
-        
-        <p class="subtitle">
-            We're working hard to bring you something amazing. 
-            Stay tuned for updates and be the first to know when we launch!
-        </p>
-        
-        <div class="email-form">
-            <div class="input-group">
-                <input type="email" placeholder="Enter your email address" required>
-                <button class="notify-btn" onclick="notifyMe()">Notify Me</button>
+
+        <div class="content">
+            <!-- Login View -->
+            <div id="loginView" class="view active">
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="accessCode">Access Code</label>
+                        <input type="text" id="accessCode" name="accessCode" required 
+                               placeholder="Enter your access code">
+                    </div>
+                    <button type="submit" class="btn">Sign In</button>
+                </form>
             </div>
-        </div>
-        
-        <div class="social-links">
-            <a href="#" class="social-link">📧</a>
-            <a href="#" class="social-link">📱</a>
-            <a href="#" class="social-link">🌐</a>
+
+            <!-- Dashboard View -->
+            <div id="dashboardView" class="view">
+                <div class="dashboard-header">
+                    <div class="user-info">
+                        <strong>Welcome, <span id="username"></span>!</strong>
+                        <div>Domain: <span id="userDomain"></span></div>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-small">Logout</button>
+                </div>
+
+                <!-- Add Alias Form -->
+                <div class="add-alias-form">
+                    <h3>Create New Alias</h3>
+                    <form id="addAliasForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="aliasName">Alias Name</label>
+                                <div class="domain-suffix">
+                                    <input type="text" id="aliasName" name="aliasName" required 
+                                           placeholder="alias">
+                                    <span class="suffix">@<span id="domainSuffix"></span></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="destinationEmail">Destination Email</label>
+                                <input type="email" id="destinationEmail" name="destinationEmail" required 
+                                       placeholder="your.email@example.com">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">Create Alias</button>
+                    </form>
+                </div>
+
+                <!-- Aliases List -->
+                <div class="aliases-section">
+                    <h3>Your Aliases</h3>
+                    <div id="aliasesList">
+                        <!-- Aliases will be loaded here -->
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Create floating particles
-        function createParticles() {
-            const particlesContainer = document.querySelector('.particles');
-            
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                
-                const size = Math.random() * 4 + 2;
-                const x = Math.random() * window.innerWidth;
-                const y = Math.random() * window.innerHeight;
-                const delay = Math.random() * 6;
-                
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = x + 'px';
-                particle.style.top = y + 'px';
-                particle.style.animationDelay = delay + 's';
-                
-                particlesContainer.appendChild(particle);
-            }
-        }
+        // Configuration - Update this with your Worker URL
+        const API_BASE_URL = 'https://email-alias-manager.lolbiggerestlol.workers.dev/';
+        
+        // DOM Elements
+        const loginView = document.getElementById('loginView');
+        const dashboardView = document.getElementById('dashboardView');
+        const loginForm = document.getElementById('loginForm');
+        const addAliasForm = document.getElementById('addAliasForm');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const aliasesList = document.getElementById('aliasesList');
+        const usernameSpan = document.getElementById('username');
+        const userDomainSpan = document.getElementById('userDomain');
+        const domainSuffixSpan = document.getElementById('domainSuffix');
 
-        // Simple notification function
-        function notifyMe() {
-            const email = document.querySelector('input[type="email"]').value;
-            if (email) {
-                alert('Thank you! We\'ll notify you at ' + email + ' when we launch.');
-                document.querySelector('input[type="email"]').value = '';
-            } else {
-                alert('Please enter a valid email address.');
-            }
-        }
+        // Application State
+        let currentUser = null;
+        let aliases = [];
 
-        // Initialize particles when page loads
-        window.addEventListener('load', createParticles);
-
-        // Add some interactivity
-        document.addEventListener('mousemove', function(e) {
-            const particles = document.querySelectorAll('.particle');
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            
-            particles.forEach((particle, index) => {
-                const speed = (index % 5 + 1) * 0.5;
-                const newX = x * speed;
-                const newY = y * speed;
-                
-                particle.style.transform += ` translate(${newX}px, ${newY}px)`;
-            });
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            setupEventListeners();
         });
+
+        // Check if user is already logged in
+        function checkAuthStatus() {
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            
+            if (token && userData) {
+                try {
+                    currentUser = JSON.parse(userData);
+                    showDashboard();
+                    loadAliases();
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                    logout();
+                }
+            } else {
+                showLogin();
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            loginForm.addEventListener('submit', handleLogin);
+            addAliasForm.addEventListener('submit', handleAddAlias);
+            logoutBtn.addEventListener('click', logout);
+        }
+
+        // Handle login form submission
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const accessCode = document.getElementById('accessCode').value;
+            const submitBtn = e.target.querySelector('button');
+            
+            try {
+                submitBtn.textContent = 'Signing in...';
+                submitBtn.classList.add('loading');
+                
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ accessCode }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store auth data
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.user));
+                    currentUser = data.user;
+                    
+                    showDashboard();
+                    loadAliases();
+                    showAlert('Login successful!', 'success');
+                } else {
+                    showAlert(data.error || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = 'Sign In';
+                submitBtn.classList.remove('loading');
+            }
+        }
+
+        // Handle add alias form submission
+        async function handleAddAlias(e) {
+            e.preventDefault();
+            
+            const aliasName = document.getElementById('aliasName').value;
+            const destinationEmail = document.getElementById('destinationEmail').value;
+            const submitBtn = e.target.querySelector('button');
+            
+            try {
+                submitBtn.textContent = 'Creating...';
+                submitBtn.classList.add('loading');
+                
+                const response = await fetch(`${API_BASE_URL}/aliases`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    },
+                    body: JSON.stringify({ aliasName, destinationEmail }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Alias created successfully!', 'success');
+                    addAliasForm.reset();
+                    loadAliases(); // Refresh the list
+                } else {
+                    showAlert(data.error || 'Failed to create alias', 'error');
+                }
+            } catch (error) {
+                console.error('Add alias error:', error);
+                showAlert('Network error. Please try again.', 'error');
+            } finally {
+                submitBtn.textContent = 'Create Alias';
+                submitBtn.classList.remove('loading');
+            }
+        }
+
+        // Load aliases from API
+        async function loadAliases() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/aliases`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    },
+                });
+
+                if (response.status === 401) {
+                    logout();
+                    return;
+                }
+
+                const data = await response.json();
+                aliases = data.aliases || [];
+                renderAliases();
+            } catch (error) {
+                console.error('Load aliases error:', error);
+                showAlert('Failed to load aliases', 'error');
+            }
+        }
+
+        // Render aliases in the UI
+        function renderAliases() {
+            if (aliases.length === 0) {
+                aliasesList.innerHTML = `
+                    <div class="empty-state">
+                        <h4>No aliases yet</h4>
+                        <p>Create your first email alias using the form above.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            aliasesList.innerHTML = aliases.map(alias => `
+                <div class="alias-card">
+                    <div class="alias-info">
+                        <div class="alias-email">${alias.fullAlias}</div>
+                        <div class="alias-destination">→ ${alias.destinationEmail}</div>
+                        <div class="alias-date">Created: ${new Date(alias.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <button class="btn btn-danger btn-small" onclick="deleteAlias('${alias.id}')">
+                        Delete
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Delete an alias
+        async function deleteAlias(aliasId) {
+            if (!confirm('Are you sure you want to delete this alias?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/aliases`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                    },
+                    body: JSON.stringify({ aliasId }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Alias deleted successfully!', 'success');
+                    loadAliases(); // Refresh the list
+                } else {
+                    showAlert(data.error || 'Failed to delete alias', 'error');
+                }
+            } catch (error) {
+                console.error('Delete alias error:', error);
+                showAlert('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Show login view
+        function showLogin() {
+            loginView.classList.add('active');
+            dashboardView.classList.remove('active');
+        }
+
+        // Show dashboard view
+        function showDashboard() {
+            loginView.classList.remove('active');
+            dashboardView.classList.add('active');
+            
+            if (currentUser) {
+                usernameSpan.textContent = currentUser.username;
+                userDomainSpan.textContent = currentUser.domain;
+                domainSuffixSpan.textContent = currentUser.domain;
+            }
+        }
+
+        // Logout user
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userData');
+            currentUser = null;
+            aliases = [];
+            showLogin();
+            showAlert('Logged out successfully', 'success');
+        }
+
+        // Show alert message
+        function showAlert(message, type = 'info') {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+
+            // Create new alert
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+
+            // Insert at the top of content
+            const content = document.querySelector('.content');
+            content.insertBefore(alert, content.firstChild);
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 5000);
+        }
     </script>
 </body>
 </html>
