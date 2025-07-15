@@ -1,4 +1,33 @@
-<!DOCTYPE html>
+simulateMultiplayer() {
+                this.demoMode = true;
+                
+                // Demo mode with simulated players
+                for (let i = 0; i < 12; i++) {
+                    const player = {
+                        id: `demo_${i}`,
+                        name: this.generateName(),
+                        color: this.generatePlayerColor(),
+                        x: Math.random() * this.canvas.width * 3,
+                        y: Math.random() * this.canvas.height * 3,
+                        lastSeen: Date.now()
+                    };
+                    this.players.set(player.id, player);
+                }
+                
+                this.updatePlayerCount();
+                
+                // Simulate activity
+                setInterval(() => {
+                    this.players.forEach(player => {
+                        if (player.id.startsWith('demo_')) {
+                            // Random movement
+                            player.x += (Math.random() - 0.5) * 200;
+                            player.y += (Math.random() - 0.5) * 200;
+                            player.x = Math.max(0, Math.min(player.x, this.canvas.width * 3));
+                            player.y = Math.max(0, Math.min(player.y, this.canvas.height * 3));
+                            
+                            // Random drawing
+                            if (Math.random() < 0.08<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -486,15 +515,25 @@
             }
             
             connectWebSocket() {
-                // Replace with your Cloudflare Worker URL
-                const wsUrl = 'https://whiteboardbackend.lolbiggerestlol.workers.dev';
+                // Connect to your Cloudflare Worker backend
+                const wsUrl = 'wss://whiteboardbackend.lolbiggerestlol.workers.dev/';
                 
                 try {
+                    this.updateStatus('Connecting to Global Canvas...', 'disconnected');
                     this.ws = new WebSocket(wsUrl);
                     
+                    // Set a connection timeout
+                    const connectionTimeout = setTimeout(() => {
+                        console.log('Connection timeout, switching to demo mode');
+                        this.ws.close();
+                        this.updateStatus('Demo Mode - Connection Timeout', 'disconnected');
+                        this.simulateMultiplayer();
+                    }, 3000);
+                    
                     this.ws.onopen = () => {
+                        clearTimeout(connectionTimeout);
                         console.log('Connected to Global Canvas');
-                        this.updateStatus('Connected', 'connected');
+                        this.updateStatus('Connected to Global Server', 'connected');
                         this.reconnectAttempts = 0;
                         
                         // Send initial player data
@@ -516,19 +555,26 @@
                     };
                     
                     this.ws.onclose = () => {
+                        clearTimeout(connectionTimeout);
                         console.log('Disconnected from Global Canvas');
-                        this.updateStatus('Disconnected', 'disconnected');
-                        this.attemptReconnect();
+                        this.updateStatus('Demo Mode - Server Offline', 'disconnected');
+                        if (!this.demoMode) {
+                            this.simulateMultiplayer();
+                        }
                     };
                     
                     this.ws.onerror = (error) => {
-                        console.error('WebSocket error:', error);
-                        this.updateStatus('Connection Error', 'disconnected');
+                        clearTimeout(connectionTimeout);
+                        console.log('WebSocket error, switching to demo mode');
+                        this.updateStatus('Demo Mode - Connection Error', 'disconnected');
+                        if (!this.demoMode) {
+                            this.simulateMultiplayer();
+                        }
                     };
                     
                 } catch (error) {
                     console.log('WebSocket not available, running in demo mode');
-                    this.updateStatus('Demo Mode', 'disconnected');
+                    this.updateStatus('Demo Mode - WebSocket Not Supported', 'disconnected');
                     this.simulateMultiplayer();
                 }
             }
