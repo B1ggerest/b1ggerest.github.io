@@ -224,7 +224,9 @@
                     };
                     
                     this.ws.onmessage = (event) => {
+                        console.log('Received message:', event.data);
                         const data = JSON.parse(event.data);
+                        console.log('Parsed message:', data);
                         this.handleServerMessage(data);
                     };
                     
@@ -342,8 +344,11 @@
             }
             
             sendMessage(message) {
+                console.log('Sending message:', message);
                 if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
                     this.ws.send(JSON.stringify(message));
+                } else {
+                    console.log('Cannot send - not connected or WebSocket not open');
                 }
             }
             
