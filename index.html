@@ -87,6 +87,49 @@
             box-shadow: 0 0 15px #ff6b6b;
         }
 
+        .stick::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            z-index: 1;
+        }
+
+        .orb-left, .orb-right {
+            position: absolute;
+            bottom: -20px;
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, #9b59b6, #6a4c93);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(155, 89, 182, 0.8);
+            animation: orb-pulse 2s infinite ease-in-out;
+        }
+
+        .orb-left {
+            left: -5px;
+            animation-delay: 0.5s;
+        }
+
+        .orb-right {
+            right: -5px;
+            animation-delay: 1s;
+        }
+
+        @keyframes orb-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(155, 89, 182, 0.8);
+            }
+            50% { 
+                transform: scale(1.2);
+                box-shadow: 0 0 30px rgba(155, 89, 182, 1);
+            }
+        }
+
         .instructions {
             text-align: center;
             font-size: 1.2em;
@@ -202,11 +245,14 @@
         <h1 class="title">THE CURSED STICK PORTAL</h1>
         
         <div class="instructions">
-            STROKE THE STICK UP AND DOWN TO UNLOCK THE ANCIENT POWERS
+            STROKE THE MAGICAL STAFF UP AND DOWN TO UNLOCK THE ANCIENT POWERS
         </div>
         
         <div class="stick-container" id="stickContainer">
-            <div class="stick" id="stick"></div>
+            <div class="stick" id="stick">
+                <div class="orb-left"></div>
+                <div class="orb-right"></div>
+            </div>
         </div>
         
         <div class="counter">
@@ -244,20 +290,20 @@
         const effectsContainer = document.getElementById('effects');
         
         const cursedMessages = [
-            "The stick hungers for more...",
-            "YESSSS... STROKE HARDER!",
+            "The staff hungers for more...",
+            "YESSSS... STROKE THE ANCIENT STAFF!",
             "You feel the dark magic flowing...",
             "The ancient ones are pleased...",
             "MOOOORE STROKES!",
-            "The stick is getting warm...",
+            "The magical orbs are glowing...",
             "Something is awakening...",
             "The portal is opening...",
-            "YOU HAVE ANGERED THE STICK GODS!",
-            "The stick demands sacrifice...",
+            "YOU HAVE ANGERED THE STAFF GODS!",
+            "The staff demands sacrifice...",
             "Reality is bending...",
             "The stroking never ends...",
             "You cannot stop now...",
-            "The stick owns your soul...",
+            "The staff owns your soul...",
             "STROKE FOR ETERNITY!"
         ];
         
@@ -312,7 +358,7 @@
                 }
                 
                 if (strokeCount > 100) {
-                    messageElement.textContent = "THE STICK HAS TRANSCENDED REALITY!";
+                    messageElement.textContent = "THE MAGICAL STAFF HAS TRANSCENDED REALITY!";
                     messageElement.style.fontSize = '2em';
                     messageElement.style.animation = 'glitch 0.1s infinite';
                 }
@@ -363,7 +409,7 @@
         // Easter egg
         setTimeout(() => {
             if (strokeCount === 0) {
-                messageElement.textContent = "Why aren't you stroking? The stick is lonely...";
+                messageElement.textContent = "Why aren't you stroking? The magical staff is lonely...";
             }
         }, 10000);
     </script>
