@@ -3,190 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Whiteboard</title>
+    <title>🚀 Infinite Whiteboard Universe</title>
     <style>
-        body {
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
             margin: 0;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background: #f0f0f0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 0;
+            box-sizing: border-box;
         }
         
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            overflow: hidden;
+            color: #fff;
+            cursor: none;
+        }
+        
+        .universe-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 255, 198, 0.1) 0%, transparent 50%);
+        }
+        
+        #infinite-canvas {
+            position: absolute;
+            cursor: none;
+            image-rendering: pixelated;
+        }
+        
+        .ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
         }
         
         .toolbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            align-items: center;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            pointer-events: all;
+            z-index: 1001;
         }
         
-        .color-picker {
-            display: flex;
-            gap: 5px;
-        }
-        
-        .color-btn {
-            width: 30px;
-            height: 30px;
-            border: 2px solid #ddd;
-            border-radius: 50%;
+        .tool-btn {
+            width: 60px;
+            height: 60px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
+            color: #fff;
+            font-family: 'Orbitron', monospace;
+            font-size: 24px;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            pointer-events: all;
         }
         
-        .color-btn:hover {
+        .tool-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+            background: linear-gradient(145deg, #3a3a4e, #2a2a3e);
+        }
+        
+        .tool-btn.active {
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+            box-shadow: 0 0 25px rgba(255, 107, 107, 0.5);
             transform: scale(1.1);
         }
         
-        .color-btn.active {
-            border-color: #333;
-            border-width: 3px;
+        .tool-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
         }
         
-        .brush-size {
+        .tool-btn:active::before {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .brush-controls {
             display: flex;
             align-items: center;
             gap: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px;
+            border-radius: 15px;
+            pointer-events: all;
         }
         
-        .brush-size input {
+        .brush-size-slider {
             width: 100px;
+            height: 6px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
         }
         
-        .clear-btn {
-            background: #ff4757;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+        .brush-size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
             cursor: pointer;
-            font-weight: bold;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
         }
         
-        .clear-btn:hover {
-            background: #ff3742;
+        .color-palette {
+            display: flex;
+            gap: 8px;
+            pointer-events: all;
         }
         
-        .canvas-container {
-            background: white;
+        .color-btn {
+            width: 35px;
+            height: 35px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .color-btn:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 15px currentColor;
+        }
+        
+        .color-btn.active {
+            border-color: #fff;
+            box-shadow: 0 0 20px currentColor, inset 0 0 10px rgba(255, 255, 255, 0.3);
+            transform: scale(1.3);
+        }
+        
+        .status-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: all;
+            z-index: 1001;
+        }
+        
+        .coordinates {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 10px 15px;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
+            font-family: 'Orbitron', monospace;
+            font-size: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+            z-index: 1001;
         }
         
-        #whiteboard {
-            border: none;
-            display: block;
-            cursor: crosshair;
+        .player-cursor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 999;
+            transition: transform 0.1s ease;
         }
         
-        .status {
-            margin-top: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        .cursor-trail {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.7;
+            animation: trailFade 1s ease-out forwards;
         }
         
-        .status.connected {
-            color: #2ed573;
+        @keyframes trailFade {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
         }
         
-        .status.disconnected {
-            color: #ff4757;
+        .explosion {
+            position: absolute;
+            pointer-events: none;
+            z-index: 998;
         }
         
-        .users-count {
-            font-weight: bold;
-            color: #5352ed;
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        @keyframes explode {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+        }
+        
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-title {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 3s ease-in-out infinite;
+            margin-bottom: 30px;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4ecdc4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🎨 Global Whiteboard</h1>
-        <p>Draw together with people from around the world!</p>
+    <div class="loading-screen" id="loadingScreen">
+        <h1 class="loading-title">INFINITE WHITEBOARD</h1>
+        <div class="loading-spinner"></div>
+        <p style="margin-top: 20px; opacity: 0.7;">Connecting to the universe...</p>
     </div>
-    
-    <div class="toolbar">
-        <div class="color-picker">
-            <div class="color-btn active" style="background: #000000" data-color="#000000"></div>
-            <div class="color-btn" style="background: #ff4757" data-color="#ff4757"></div>
-            <div class="color-btn" style="background: #2ed573" data-color="#2ed573"></div>
-            <div class="color-btn" style="background: #5352ed" data-color="#5352ed"></div>
-            <div class="color-btn" style="background: #ffa502" data-color="#ffa502"></div>
-            <div class="color-btn" style="background: #ff6b81" data-color="#ff6b81"></div>
-            <div class="color-btn" style="background: #70a1ff" data-color="#70a1ff"></div>
-            <div class="color-btn" style="background: #7bed9f" data-color="#7bed9f"></div>
-        </div>
+
+    <div class="universe-container">
+        <canvas id="infinite-canvas"></canvas>
         
-        <div class="brush-size">
-            <label>Brush Size:</label>
-            <input type="range" id="brushSize" min="1" max="20" value="3">
-            <span id="brushSizeValue">3px</span>
+        <div class="ui-overlay">
+            <div class="toolbar">
+                <div class="tool-btn active" data-tool="brush" title="Brush">🖌️</div>
+                <div class="tool-btn" data-tool="bomb" title="Bomb">💣</div>
+                <div class="tool-btn" data-tool="eraser" title="Eraser">🧽</div>
+                <div class="tool-btn" data-tool="laser" title="Laser">⚡</div>
+                <div class="tool-btn" data-tool="sparkle" title="Sparkles">✨</div>
+                
+                <div class="brush-controls">
+                    <span style="font-size: 12px;">SIZE</span>
+                    <input type="range" class="brush-size-slider" id="brushSize" min="2" max="50" value="8">
+                    <span id="brushSizeValue" style="font-size: 12px; min-width: 25px;">8px</span>
+                </div>
+                
+                <div class="color-palette">
+                    <div class="color-btn active" style="background: #ff6b6b" data-color="#ff6b6b"></div>
+                    <div class="color-btn" style="background: #4ecdc4" data-color="#4ecdc4"></div>
+                    <div class="color-btn" style="background: #45b7d1" data-color="#45b7d1"></div>
+                    <div class="color-btn" style="background: #96ceb4" data-color="#96ceb4"></div>
+                    <div class="color-btn" style="background: #feca57" data-color="#feca57"></div>
+                    <div class="color-btn" style="background: #ff9ff3" data-color="#ff9ff3"></div>
+                    <div class="color-btn" style="background: #54a0ff" data-color="#54a0ff"></div>
+                    <div class="color-btn" style="background: #5f27cd" data-color="#5f27cd"></div>
+                </div>
+            </div>
+            
+            <div class="status-panel">
+                <div style="font-size: 14px; margin-bottom: 5px;">🌌 <span id="playerCount">1</span> explorers online</div>
+                <div style="font-size: 12px; opacity: 0.7;" id="connectionStatus">Connected to universe</div>
+            </div>
+            
+            <div class="coordinates">
+                <div>X: <span id="coordX">0</span></div>
+                <div>Y: <span id="coordY">0</span></div>
+                <div>Zoom: <span id="zoomLevel">100%</span></div>
+            </div>
         </div>
-        
-        <button class="clear-btn" id="clearBtn">Clear Board</button>
-    </div>
-    
-    <div class="canvas-container">
-        <canvas id="whiteboard" width="800" height="600"></canvas>
-    </div>
-    
-    <div class="status disconnected" id="status">
-        Connecting to server...
-        <span class="users-count" id="usersCount"></span>
     </div>
 
     <script>
-        class WhiteboardGame {
+        class InfiniteWhiteboardUniverse {
             constructor() {
-                this.canvas = document.getElementById('whiteboard');
+                this.canvas = document.getElementById('infinite-canvas');
                 this.ctx = this.canvas.getContext('2d');
-                this.isDrawing = false;
-                this.currentColor = '#000000';
-                this.currentSize = 3;
-                this.lastX = 0;
-                this.lastY = 0;
                 
+                // Infinite canvas properties
+                this.viewportX = 0;
+                this.viewportY = 0;
+                this.zoom = 1;
+                this.canvasWidth = 10000;
+                this.canvasHeight = 10000;
+                
+                // Drawing state
+                this.isDrawing = false;
+                this.currentTool = 'brush';
+                this.currentColor = '#ff6b6b';
+                this.currentSize = 8;
+                this.currentStroke = [];
+                
+                // Multiplayer
                 this.ws = null;
                 this.isConnected = false;
-                this.usersCount = 0;
+                this.playerId = this.generatePlayerId();
+                this.playerCursors = new Map();
+                this.mouseX = 0;
+                this.mouseY = 0;
+                
+                // Effects
+                this.particles = [];
+                this.trails = [];
+                
+                // Optimization
+                this.lastCursorBroadcast = 0;
+                this.cursorBroadcastThrottle = 50; // ms
                 
                 this.setupCanvas();
                 this.setupUI();
+                this.setupEventListeners();
                 this.connectToServer();
+                this.startAnimationLoop();
+                
+                // Hide loading screen after setup
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                }, 2000);
+            }
+            
+            generatePlayerId() {
+                return 'player_' + Math.random().toString(36).substr(2, 9);
             }
             
             setupCanvas() {
+                this.resizeCanvas();
                 this.ctx.lineCap = 'round';
                 this.ctx.lineJoin = 'round';
+                this.ctx.imageSmoothingEnabled = true;
                 
-                // Mouse events
-                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
-                this.canvas.addEventListener('mousemove', this.draw.bind(this));
-                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
-                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
-                
-                // Touch events for mobile
-                this.canvas.addEventListener('touchstart', this.handleTouch.bind(this));
-                this.canvas.addEventListener('touchmove', this.handleTouch.bind(this));
-                this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+                window.addEventListener('resize', () => this.resizeCanvas());
+            }
+            
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
             }
             
             setupUI() {
-                // Color picker
+                // Tool buttons
+                document.querySelectorAll('.tool-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelector('.tool-btn.active').classList.remove('active');
+                        btn.classList.add('active');
+                        this.currentTool = btn.dataset.tool;
+                        this.updateCursor();
+                    });
+                });
+                
+                // Color palette
                 document.querySelectorAll('.color-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         document.querySelector('.color-btn.active').classList.remove('active');
@@ -200,17 +437,386 @@
                 const brushSizeValue = document.getElementById('brushSizeValue');
                 
                 brushSize.addEventListener('input', () => {
-                    this.currentSize = brushSize.value;
+                    this.currentSize = parseInt(brushSize.value);
                     brushSizeValue.textContent = `${brushSize.value}px`;
                 });
+            }
+            
+            setupEventListeners() {
+                // Mouse events
+                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+                this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
                 
-                // Clear button
-                document.getElementById('clearBtn').addEventListener('click', () => {
-                    this.clearCanvas();
-                    this.sendMessage({
-                        type: 'clear'
-                    });
+                // Touch events
+                this.canvas.addEventListener('touchstart', this.handleTouch.bind(this));
+                this.canvas.addEventListener('touchmove', this.handleTouch.bind(this));
+                this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+                
+                // Keyboard shortcuts
+                window.addEventListener('keydown', this.handleKeyboard.bind(this));
+                
+                // Pan and zoom
+                this.canvas.addEventListener('wheel', this.handleWheel.bind(this));
+                
+                // Middle mouse drag for panning
+                let isPanning = false;
+                let lastPanX = 0;
+                let lastPanY = 0;
+                
+                this.canvas.addEventListener('mousedown', (e) => {
+                    if (e.button === 1) { // Middle mouse
+                        isPanning = true;
+                        lastPanX = e.clientX;
+                        lastPanY = e.clientY;
+                        e.preventDefault();
+                    }
                 });
+                
+                this.canvas.addEventListener('mousemove', (e) => {
+                    if (isPanning) {
+                        const deltaX = e.clientX - lastPanX;
+                        const deltaY = e.clientY - lastPanY;
+                        this.viewportX -= deltaX / this.zoom;
+                        this.viewportY -= deltaY / this.zoom;
+                        lastPanX = e.clientX;
+                        lastPanY = e.clientY;
+                        this.updateCoordinates();
+                    }
+                });
+                
+                this.canvas.addEventListener('mouseup', (e) => {
+                    if (e.button === 1) {
+                        isPanning = false;
+                    }
+                });
+            }
+            
+            updateCursor() {
+                const cursors = {
+                    brush: 'crosshair',
+                    bomb: 'pointer',
+                    eraser: 'grab',
+                    laser: 'crosshair',
+                    sparkle: 'pointer'
+                };
+                this.canvas.style.cursor = cursors[this.currentTool] || 'crosshair';
+            }
+            
+            getWorldCoordinates(clientX, clientY) {
+                const rect = this.canvas.getBoundingClientRect();
+                const x = (clientX - rect.left) / this.zoom + this.viewportX;
+                const y = (clientY - rect.top) / this.zoom + this.viewportY;
+                return [x, y];
+            }
+            
+            getScreenCoordinates(worldX, worldY) {
+                const x = (worldX - this.viewportX) * this.zoom;
+                const y = (worldY - this.viewportY) * this.zoom;
+                return [x, y];
+            }
+            
+            handleMouseMove(e) {
+                const [worldX, worldY] = this.getWorldCoordinates(e.clientX, e.clientY);
+                this.mouseX = worldX;
+                this.mouseY = worldY;
+                
+                this.updateCoordinates();
+                this.broadcastCursor();
+                
+                if (this.isDrawing) {
+                    this.draw(e);
+                }
+            }
+            
+            updateCoordinates() {
+                document.getElementById('coordX').textContent = Math.round(this.mouseX);
+                document.getElementById('coordY').textContent = Math.round(this.mouseY);
+                document.getElementById('zoomLevel').textContent = Math.round(this.zoom * 100) + '%';
+            }
+            
+            broadcastCursor() {
+                const now = Date.now();
+                if (now - this.lastCursorBroadcast > this.cursorBroadcastThrottle) {
+                    this.sendMessage({
+                        type: 'cursor',
+                        playerId: this.playerId,
+                        x: this.mouseX,
+                        y: this.mouseY,
+                        tool: this.currentTool,
+                        color: this.currentColor
+                    });
+                    this.lastCursorBroadcast = now;
+                }
+            }
+            
+            startDrawing(e) {
+                if (e.button !== 0) return; // Only left mouse
+                
+                this.isDrawing = true;
+                const [x, y] = this.getWorldCoordinates(e.clientX, e.clientY);
+                
+                if (this.currentTool === 'bomb') {
+                    this.createBomb(x, y);
+                    return;
+                }
+                
+                if (this.currentTool === 'laser') {
+                    this.createLaser(x, y);
+                    return;
+                }
+                
+                if (this.currentTool === 'sparkle') {
+                    this.createSparkles(x, y);
+                    return;
+                }
+                
+                // Start stroke for brush/eraser
+                this.currentStroke = [{
+                    x: x,
+                    y: y,
+                    tool: this.currentTool,
+                    color: this.currentColor,
+                    size: this.currentSize
+                }];
+            }
+            
+            draw(e) {
+                if (!this.isDrawing) return;
+                
+                const [currentX, currentY] = this.getWorldCoordinates(e.clientX, e.clientY);
+                const lastPoint = this.currentStroke[this.currentStroke.length - 1];
+                
+                // Draw locally for immediate feedback
+                this.drawStrokeSegment(lastPoint.x, lastPoint.y, currentX, currentY, this.currentTool, this.currentColor, this.currentSize);
+                
+                // Add point to stroke
+                this.currentStroke.push({
+                    x: currentX,
+                    y: currentY,
+                    tool: this.currentTool,
+                    color: this.currentColor,
+                    size: this.currentSize
+                });
+                
+                // Create trail for brush
+                if (this.currentTool === 'brush') {
+                    this.createTrail(currentX, currentY, this.currentColor);
+                }
+            }
+            
+            stopDrawing() {
+                if (!this.isDrawing) return;
+                
+                this.isDrawing = false;
+                
+                // Send complete stroke
+                if (this.currentStroke.length > 1) {
+                    this.sendMessage({
+                        type: 'stroke',
+                        stroke: this.currentStroke,
+                        tool: this.currentTool
+                    });
+                }
+                
+                this.currentStroke = [];
+            }
+            
+            drawStrokeSegment(fromX, fromY, toX, toY, tool, color, size) {
+                this.ctx.save();
+                
+                // Transform to screen coordinates
+                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
+                
+                if (tool === 'eraser') {
+                    this.ctx.globalCompositeOperation = 'destination-out';
+                    this.ctx.strokeStyle = 'rgba(0,0,0,1)';
+                } else {
+                    this.ctx.globalCompositeOperation = 'source-over';
+                    this.ctx.strokeStyle = color;
+                }
+                
+                this.ctx.lineWidth = size;
+                this.ctx.beginPath();
+                this.ctx.moveTo(fromX, fromY);
+                this.ctx.lineTo(toX, toY);
+                this.ctx.stroke();
+                
+                this.ctx.restore();
+            }
+            
+            createBomb(x, y) {
+                // Create explosion effect
+                this.createExplosion(x, y);
+                
+                // Send bomb to server
+                this.sendMessage({
+                    type: 'bomb',
+                    x: x,
+                    y: y,
+                    size: this.currentSize * 3,
+                    playerId: this.playerId
+                });
+                
+                // Clear area locally
+                this.ctx.save();
+                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
+                this.ctx.globalCompositeOperation = 'destination-out';
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, this.currentSize * 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+            }
+            
+            createExplosion(x, y) {
+                const [screenX, screenY] = this.getScreenCoordinates(x, y);
+                const particleCount = 30;
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const angle = (Math.PI * 2 * i) / particleCount;
+                    const velocity = 2 + Math.random() * 4;
+                    const life = 1000 + Math.random() * 500;
+                    
+                    this.particles.push({
+                        x: screenX,
+                        y: screenY,
+                        vx: Math.cos(angle) * velocity,
+                        vy: Math.sin(angle) * velocity,
+                        life: life,
+                        maxLife: life,
+                        color: `hsl(${Math.random() * 60 + 10}, 100%, 60%)`
+                    });
+                }
+            }
+            
+            createLaser(x, y) {
+                // Create instant laser effect across screen
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 1000;
+                const endX = x + Math.cos(angle) * distance;
+                const endY = y + Math.sin(angle) * distance;
+                
+                // Draw laser line
+                this.ctx.save();
+                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
+                this.ctx.strokeStyle = this.currentColor;
+                this.ctx.lineWidth = this.currentSize / 2;
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = this.currentColor;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(endX, endY);
+                this.ctx.stroke();
+                this.ctx.restore();
+                
+                this.sendMessage({
+                    type: 'laser',
+                    fromX: x,
+                    fromY: y,
+                    toX: endX,
+                    toY: endY,
+                    color: this.currentColor,
+                    size: this.currentSize
+                });
+            }
+            
+            createSparkles(x, y) {
+                const [screenX, screenY] = this.getScreenCoordinates(x, y);
+                
+                for (let i = 0; i < 15; i++) {
+                    const offsetX = (Math.random() - 0.5) * 50;
+                    const offsetY = (Math.random() - 0.5) * 50;
+                    
+                    this.particles.push({
+                        x: screenX + offsetX,
+                        y: screenY + offsetY,
+                        vx: (Math.random() - 0.5) * 2,
+                        vy: (Math.random() - 0.5) * 2,
+                        life: 2000,
+                        maxLife: 2000,
+                        color: this.currentColor,
+                        sparkle: true
+                    });
+                }
+                
+                this.sendMessage({
+                    type: 'sparkle',
+                    x: x,
+                    y: y,
+                    color: this.currentColor
+                });
+            }
+            
+            createTrail(x, y, color) {
+                const [screenX, screenY] = this.getScreenCoordinates(x, y);
+                
+                this.trails.push({
+                    x: screenX,
+                    y: screenY,
+                    color: color,
+                    life: 500,
+                    maxLife: 500
+                });
+            }
+            
+            handleTouch(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent(
+                    e.type === 'touchstart' ? 'mousedown' : 
+                    e.type === 'touchmove' ? 'mousemove' : 'mouseup',
+                    {
+                        clientX: touch.clientX,
+                        clientY: touch.clientY,
+                        button: 0
+                    }
+                );
+                this.canvas.dispatchEvent(mouseEvent);
+            }
+            
+            handleKeyboard(e) {
+                switch(e.code) {
+                    case 'Digit1': this.switchTool('brush'); break;
+                    case 'Digit2': this.switchTool('bomb'); break;
+                    case 'Digit3': this.switchTool('eraser'); break;
+                    case 'Digit4': this.switchTool('laser'); break;
+                    case 'Digit5': this.switchTool('sparkle'); break;
+                    case 'Space': 
+                        e.preventDefault();
+                        this.clearCanvas();
+                        break;
+                }
+            }
+            
+            switchTool(tool) {
+                document.querySelector('.tool-btn.active').classList.remove('active');
+                document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
+                this.currentTool = tool;
+                this.updateCursor();
+            }
+            
+            handleWheel(e) {
+                e.preventDefault();
+                const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                const newZoom = Math.max(0.1, Math.min(5, this.zoom * zoomFactor));
+                
+                // Zoom towards mouse position
+                const [worldX, worldY] = this.getWorldCoordinates(e.clientX, e.clientY);
+                
+                this.zoom = newZoom;
+                
+                // Adjust viewport to keep mouse position steady
+                const [newWorldX, newWorldY] = this.getWorldCoordinates(e.clientX, e.clientY);
+                this.viewportX += worldX - newWorldX;
+                this.viewportY += worldY - newWorldY;
+                
+                this.updateCoordinates();
+            }
+            
+            clearCanvas() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.sendMessage({ type: 'clear' });
             }
             
             connectToServer() {
@@ -219,170 +825,254 @@
                     
                     this.ws.onopen = () => {
                         this.isConnected = true;
-                        this.updateStatus('Connected to global whiteboard');
-                        console.log('Connected to whiteboard server');
+                        document.getElementById('connectionStatus').textContent = 'Connected to universe';
+                        console.log('Connected to infinite whiteboard universe');
                     };
                     
                     this.ws.onmessage = (event) => {
-                        console.log('Received message:', event.data);
                         const data = JSON.parse(event.data);
-                        console.log('Parsed message:', data);
                         this.handleServerMessage(data);
                     };
                     
                     this.ws.onclose = () => {
                         this.isConnected = false;
-                        this.updateStatus('Disconnected from server');
-                        console.log('Disconnected from server');
-                        
-                        // Attempt to reconnect after 3 seconds
-                        setTimeout(() => {
-                            this.connectToServer();
-                        }, 3000);
-                    };
-                    
-                    this.ws.onerror = (error) => {
-                        console.error('WebSocket error:', error);
-                        this.updateStatus('Connection error');
+                        document.getElementById('connectionStatus').textContent = 'Disconnected - Reconnecting...';
+                        setTimeout(() => this.connectToServer(), 3000);
                     };
                     
                 } catch (error) {
-                    console.error('Failed to connect:', error);
-                    this.updateStatus('Failed to connect to server');
+                    console.error('Connection failed:', error);
+                    document.getElementById('connectionStatus').textContent = 'Connection failed';
                 }
             }
             
             handleServerMessage(data) {
-                console.log('Handling server message:', data.type);
                 switch (data.type) {
-                    case 'draw':
-                        console.log('Drawing remote line:', data);
-                        this.drawRemoteLine(data);
+                    case 'stroke':
+                        this.drawRemoteStroke(data.stroke);
+                        break;
+                    case 'bomb':
+                        this.handleRemoteBomb(data);
+                        break;
+                    case 'laser':
+                        this.drawRemoteLaser(data);
+                        break;
+                    case 'sparkle':
+                        this.handleRemoteSparkle(data);
+                        break;
+                    case 'cursor':
+                        this.updatePlayerCursor(data);
                         break;
                     case 'clear':
-                        console.log('Clearing canvas from server');
-                        this.clearCanvas();
+                        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                         break;
                     case 'users_count':
-                        console.log('Users count update:', data.count);
-                        this.usersCount = data.count;
-                        this.updateUsersCount();
+                        document.getElementById('playerCount').textContent = data.count;
                         break;
                     case 'canvas_state':
-                        console.log('Loading canvas state, lines:', data.lines.length);
-                        this.loadCanvasState(data.lines);
+                        this.loadCanvasState(data);
                         break;
                 }
             }
             
-            startDrawing(e) {
-                this.isDrawing = true;
-                [this.lastX, this.lastY] = this.getMousePos(e);
-            }
-            
-            draw(e) {
-                if (!this.isDrawing) return;
+            drawRemoteStroke(stroke) {
+                if (stroke.length < 2) return;
                 
-                const [currentX, currentY] = this.getMousePos(e);
+                this.ctx.save();
+                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
                 
-                this.drawLine(this.lastX, this.lastY, currentX, currentY, this.currentColor, this.currentSize);
+                const firstPoint = stroke[0];
                 
-                // Send drawing data to server
-                this.sendMessage({
-                    type: 'draw',
-                    fromX: this.lastX,
-                    fromY: this.lastY,
-                    toX: currentX,
-                    toY: currentY,
-                    color: this.currentColor,
-                    size: this.currentSize
-                });
+                if (firstPoint.tool === 'eraser') {
+                    this.ctx.globalCompositeOperation = 'destination-out';
+                    this.ctx.strokeStyle = 'rgba(0,0,0,1)';
+                } else {
+                    this.ctx.globalCompositeOperation = 'source-over';
+                    this.ctx.strokeStyle = firstPoint.color;
+                }
                 
-                [this.lastX, this.lastY] = [currentX, currentY];
-            }
-            
-            stopDrawing() {
-                this.isDrawing = false;
-            }
-            
-            handleTouch(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
-                                                e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
-                    clientX: touch.clientX,
-                    clientY: touch.clientY
-                });
-                this.canvas.dispatchEvent(mouseEvent);
-            }
-            
-            getMousePos(e) {
-                const rect = this.canvas.getBoundingClientRect();
-                return [
-                    e.clientX - rect.left,
-                    e.clientY - rect.top
-                ];
-            }
-            
-            drawLine(fromX, fromY, toX, toY, color, size) {
-                console.log('Drawing line from', fromX, fromY, 'to', toX, toY, 'color:', color, 'size:', size);
-                this.ctx.strokeStyle = color;
-                this.ctx.lineWidth = size;
+                this.ctx.lineWidth = firstPoint.size;
                 this.ctx.beginPath();
-                this.ctx.moveTo(fromX, fromY);
-                this.ctx.lineTo(toX, toY);
+                this.ctx.moveTo(stroke[0].x, stroke[0].y);
+                
+                for (let i = 1; i < stroke.length; i++) {
+                    this.ctx.lineTo(stroke[i].x, stroke[i].y);
+                }
+                
                 this.ctx.stroke();
+                this.ctx.restore();
             }
             
-            drawRemoteLine(data) {
-                console.log('Drawing remote line with data:', data);
-                this.drawLine(data.fromX, data.fromY, data.toX, data.toY, data.color, data.size);
+            handleRemoteBomb(data) {
+                if (data.playerId !== this.playerId) {
+                    // Create explosion effect
+                    this.createExplosion(data.x, data.y);
+                    
+                    // Clear area
+                    this.ctx.save();
+                    this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
+                    this.ctx.globalCompositeOperation = 'destination-out';
+                    this.ctx.beginPath();
+                    this.ctx.arc(data.x, data.y, data.size, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    this.ctx.restore();
+                }
             }
             
-            clearCanvas() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            drawRemoteLaser(data) {
+                this.ctx.save();
+                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
+                this.ctx.strokeStyle = data.color;
+                this.ctx.lineWidth = data.size / 2;
+                this.ctx.shadowBlur = 20;
+                this.ctx.shadowColor = data.color;
+                this.ctx.beginPath();
+                this.ctx.moveTo(data.fromX, data.fromY);
+                this.ctx.lineTo(data.toX, data.toY);
+                this.ctx.stroke();
+                this.ctx.restore();
             }
             
-            loadCanvasState(lines) {
-                this.clearCanvas();
-                lines.forEach(line => {
-                    this.drawLine(line.fromX, line.fromY, line.toX, line.toY, line.color, line.size);
+            handleRemoteSparkle(data) {
+                this.createSparkles(data.x, data.y);
+            }
+            
+            updatePlayerCursor(data) {
+                if (data.playerId === this.playerId) return;
+                
+                this.playerCursors.set(data.playerId, {
+                    x: data.x,
+                    y: data.y,
+                    tool: data.tool,
+                    color: data.color,
+                    lastUpdate: Date.now()
                 });
+            }
+            
+            loadCanvasState(data) {
+                // Load existing canvas state when joining
+                if (data.strokes) {
+                    data.strokes.forEach(stroke => this.drawRemoteStroke(stroke.stroke || stroke.points));
+                }
             }
             
             sendMessage(message) {
-                console.log('Sending message:', message);
                 if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
                     this.ws.send(JSON.stringify(message));
-                } else {
-                    console.log('Cannot send - not connected or WebSocket not open');
                 }
             }
             
-            updateStatus(message) {
-                const status = document.getElementById('status');
-                status.textContent = message + ' ';
-                status.className = this.isConnected ? 'status connected' : 'status disconnected';
-                
-                const usersSpan = document.getElementById('usersCount');
-                status.appendChild(usersSpan);
-                this.updateUsersCount();
+            startAnimationLoop() {
+                const animate = () => {
+                    this.updateParticles();
+                    this.updateTrails();
+                    this.renderPlayerCursors();
+                    this.cleanupOldCursors();
+                    requestAnimationFrame(animate);
+                };
+                animate();
             }
             
-            updateUsersCount() {
-                console.log('Updating users count to:', this.usersCount);
-                const usersSpan = document.getElementById('usersCount');
-                if (this.usersCount > 0) {
-                    usersSpan.textContent = `(${this.usersCount} user${this.usersCount === 1 ? '' : 's'} online)`;
-                } else {
-                    usersSpan.textContent = '';
-                }
+            updateParticles() {
+                this.particles = this.particles.filter(particle => {
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.life -= 16; // ~60fps
+                    
+                    if (particle.life > 0) {
+                        const alpha = particle.life / particle.maxLife;
+                        
+                        // Render particle
+                        this.ctx.save();
+                        this.ctx.globalAlpha = alpha;
+                        this.ctx.fillStyle = particle.color;
+                        
+                        if (particle.sparkle) {
+                            this.ctx.shadowBlur = 10;
+                            this.ctx.shadowColor = particle.color;
+                        }
+                        
+                        this.ctx.beginPath();
+                        this.ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.restore();
+                        
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            
+            updateTrails() {
+                this.trails = this.trails.filter(trail => {
+                    trail.life -= 16;
+                    
+                    if (trail.life > 0) {
+                        const alpha = trail.life / trail.maxLife;
+                        
+                        this.ctx.save();
+                        this.ctx.globalAlpha = alpha * 0.5;
+                        this.ctx.fillStyle = trail.color;
+                        this.ctx.beginPath();
+                        this.ctx.arc(trail.x, trail.y, 2, 0, Math.PI * 2);
+                        this.ctx.fill();
+                        this.ctx.restore();
+                        
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            
+            renderPlayerCursors() {
+                this.playerCursors.forEach((cursor, playerId) => {
+                    const [screenX, screenY] = this.getScreenCoordinates(cursor.x, cursor.y);
+                    
+                    // Only render if on screen
+                    if (screenX >= -50 && screenX <= this.canvas.width + 50 && 
+                        screenY >= -50 && screenY <= this.canvas.height + 50) {
+                        
+                        this.ctx.save();
+                        this.ctx.fillStyle = cursor.color;
+                        this.ctx.strokeStyle = '#fff';
+                        this.ctx.lineWidth = 2;
+                        
+                        // Draw cursor based on tool
+                        switch(cursor.tool) {
+                            case 'bomb':
+                                this.ctx.font = '20px serif';
+                                this.ctx.fillText('💣', screenX, screenY);
+                                break;
+                            case 'eraser':
+                                this.ctx.beginPath();
+                                this.ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
+                                this.ctx.stroke();
+                                break;
+                            default:
+                                this.ctx.beginPath();
+                                this.ctx.arc(screenX, screenY, 5, 0, Math.PI * 2);
+                                this.ctx.fill();
+                                this.ctx.stroke();
+                        }
+                        
+                        this.ctx.restore();
+                    }
+                });
+            }
+            
+            cleanupOldCursors() {
+                const now = Date.now();
+                this.playerCursors.forEach((cursor, playerId) => {
+                    if (now - cursor.lastUpdate > 5000) { // 5 seconds timeout
+                        this.playerCursors.delete(playerId);
+                    }
+                });
             }
         }
         
-        // Initialize the whiteboard game when the page loads
+        // Initialize when page loads
         window.addEventListener('load', () => {
-            new WhiteboardGame();
+            new InfiniteWhiteboardUniverse();
         });
     </script>
 </body>
