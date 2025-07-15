@@ -2,493 +2,286 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌀 The Arcane Core 🌀</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Collaborative Infinite Whiteboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #8A2BE2; /* BlueViolet */
-            --secondary-color: #FF00FF; /* Magenta */
-            --background-color: #0d0a1a;
-            --text-color: #e0e0e0;
-            --glow-color: rgba(138, 43, 226, 0.8);
-            --disabled-color: #555;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: 'Courier New', monospace;
-            background: var(--background-color);
-            color: var(--text-color);
-            overflow: hidden;
-            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><text y="20" font-size="20">✨</text></svg>'), auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            /* Prevents pull-to-refresh and other browser gestures on mobile */
+            overscroll-behavior: none;
         }
-        
-        #background-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
+        canvas {
+            cursor: crosshair;
+            /* Disables browser handling of touch events like panning/zooming on the canvas itself */
+            touch-action: none; 
+            display: block; /* Removes any default spacing below the canvas */
         }
-
-        .game-container {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            gap: 20px;
-            width: 95%;
-            max-width: 1200px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            border: 1px solid var(--primary-color);
-            box-shadow: 0 0 30px var(--glow-color);
+        .color-swatch {
+            transition: transform 0.2s ease;
         }
-
-        .panel {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(138, 43, 226, 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .color-swatch.active {
+            transform: scale(1.25);
+            box-shadow: 0 0 0 3px #4f46e5; /* Indigo-600 */
         }
-
-        h1, h2 {
-            text-align: center;
-            text-shadow: 0 0 10px var(--secondary-color);
-            color: var(--secondary-color);
-            margin-bottom: 20px;
-        }
-        
-        /* Middle Panel - Core Clicker */
-        .core-panel {
-            justify-content: center;
-            position: relative;
-        }
-
-        #core-clicker {
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle, var(--secondary-color) 0%, var(--primary-color) 70%, var(--background-color) 100%);
-            border-radius: 50%;
-            cursor: pointer;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px var(--secondary-color), 0 0 40px var(--primary-color), inset 0 0 20px var(--background-color);
-            animation: core-pulse 4s infinite ease-in-out;
-            transition: transform 0.1s ease;
-        }
-        
-        #core-clicker:active {
-            transform: scale(0.95);
-        }
-
-        @keyframes core-pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 20px var(--secondary-color), 0 0 40px var(--primary-color); }
-            50% { transform: scale(1.05); box-shadow: 0 0 30px var(--secondary-color), 0 0 60px var(--primary-color); }
-        }
-        
-        .click-particle {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: var(--secondary-color);
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 1;
-            animation: fly-out 1s ease-out forwards;
-        }
-
-        @keyframes fly-out {
-            to {
-                transform: translate(var(--x), var(--y));
-                opacity: 0;
-            }
-        }
-        
-        .floating-number {
-            position: absolute;
-            pointer-events: none;
-            color: #fff;
-            font-size: 1.5em;
-            text-shadow: 0 0 5px var(--secondary-color);
-            animation: float-up 1s ease-out forwards;
-        }
-
-        @keyframes float-up {
-            to {
-                transform: translateY(-80px);
-                opacity: 0;
-            }
-        }
-        
-        /* Left Panel - Stats */
-        .stats-panel h2 { margin-bottom: 30px; }
-        .stat {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-        .stat-label { color: var(--secondary-color); }
-        .stat-value { color: var(--text-color); }
-
-        /* Right Panel - Upgrades & Rebirth */
-        .shop-panel {
-            gap: 25px;
-        }
-        .shop-container, .rebirth-container {
-             width: 100%;
-        }
-        
-        .upgrade-btn {
-            width: 100%;
-            padding: 10px;
-            background: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--text-color);
-            border-radius: 5px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-            font-family: 'Courier New', monospace;
-        }
-        
-        .upgrade-btn:hover:not(:disabled) {
-            background: var(--primary-color);
-            box-shadow: 0 0 15px var(--glow-color);
-        }
-
-        .upgrade-btn:disabled {
-            border-color: var(--disabled-color);
-            color: var(--disabled-color);
-            cursor: not-allowed;
-        }
-        
-        .upgrade-info {
-            display: block;
-            font-size: 0.8em;
-            opacity: 0.8;
-        }
-        
-        #rebirth-btn {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
-            background: transparent;
-            border: 2px solid var(--secondary-color);
-            color: var(--secondary-color);
-        }
-
-        #rebirth-btn:hover:not(:disabled) {
-            background: var(--secondary-color);
-            color: #000;
-            box-shadow: 0 0 20px var(--secondary-color);
-        }
-        
     </style>
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-gray-900 flex flex-col h-screen overflow-hidden">
 
-    <div id="background-particles"></div>
-    <div class="game-container">
-        <div class="panel stats-panel">
-            <h2>📊 Stats</h2>
-            <div class="stat">
-                <span class="stat-label">Power:</span>
-                <span id="power-stat" class="stat-value">0</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Power/Click:</span>
-                <span id="ppc-stat" class="stat-value">1</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Power/Second:</span>
-                <span id="pps-stat" class="stat-value">0</span>
-            </div>
-            <hr style="width:100%; border-color: var(--primary-color); margin: 20px 0;">
-            <div class="stat">
-                <span class="stat-label">Rebirths:</span>
-                <span id="rebirths-stat" class="stat-value">0</span>
-            </div>
-            <div class="stat">
-                <span class="stat-label">Essence:</span>
-                <span id="essence-stat" class="stat-value">0</span>
-            </div>
-             <div class="stat">
-                <span class="stat-label">Global Bonus:</span>
-                <span id="bonus-stat" class="stat-value">+0%</span>
+    <!-- Header & Toolbar -->
+    <header class="bg-white dark:bg-gray-800 shadow-md z-20 flex-shrink-0">
+        <div class="container mx-auto px-4 py-2 flex justify-between items-center">
+            <h1 class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">Infinite Whiteboard</h1>
+            <div id="toolbar" class="flex items-center space-x-2 md:space-x-4">
+                <!-- Color Palette -->
+                <div class="flex items-center space-x-1 md:space-x-2 bg-gray-200 dark:bg-gray-700 p-1 rounded-lg">
+                    <button class="color-swatch w-6 h-6 rounded-full bg-black active" data-color="black" aria-label="Black"></button>
+                    <button class="color-swatch w-6 h-6 rounded-full bg-red-500" data-color="#ef4444" aria-label="Red"></button>
+                    <button class="color-swatch w-6 h-6 rounded-full bg-blue-500" data-color="#3b82f6" aria-label="Blue"></button>
+                    <button class="color-swatch w-6 h-6 rounded-full bg-green-500" data-color="#22c55e" aria-label="Green"></button>
+                    <button class="color-swatch w-6 h-6 rounded-full bg-yellow-500" data-color="#eab308" aria-label="Yellow"></button>
+                </div>
+                 <!-- Brush Size -->
+                <div class="flex items-center space-x-2">
+                    <label for="brushSize" class="text-sm text-gray-600 dark:text-gray-300 hidden md:block">Size:</label>
+                    <input type="range" id="brushSize" min="1" max="50" value="5" class="w-24 cursor-pointer">
+                </div>
             </div>
         </div>
+    </header>
 
-        <div class="panel core-panel">
-            <h1>The Arcane Core</h1>
-            <div id="core-clicker"></div>
-        </div>
-
-        <div class="panel shop-panel">
-            <div class="shop-container">
-                <h2>🔮 Upgrades</h2>
-                <div id="upgrades-container"></div>
-            </div>
-            <div class="rebirth-container">
-                <h2>🌀 Rebirth</h2>
-                <button id="rebirth-btn" class="upgrade-btn" disabled>
-                    Reset for a permanent bonus
-                    <span id="rebirth-cost-info" class="upgrade-info">Cost: 1,000,000 Power</span>
-                </button>
-            </div>
-        </div>
-    </div>
+    <!-- Main Canvas Area -->
+    <main class="flex-grow relative" id="canvas-container">
+        <canvas id="whiteboard-canvas"></canvas>
+    </main>
 
     <script>
-        // --- GAME STATE ---
-        let gameState = {
-            power: 0,
-            powerPerClick: 1,
-            powerPerSecond: 0,
-            rebirths: 0,
-            essence: 0,
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('whiteboard-canvas');
+            const ctx = canvas.getContext('2d');
+            const toolbar = document.getElementById('toolbar');
+            const canvasContainer = document.getElementById('canvas-container');
 
-        const REBIRTH_COST = 1e6; // 1 Million power to rebirth
+            let drawing = false;
+            let currentColor = 'black';
+            let currentBrushSize = 5;
+            let lineHistory = []; // Local cache of drawing history
 
-        // --- UPGRADES CONFIG ---
-        const upgrades = {
-            cursor: {
-                name: 'Arcane Pointer',
-                description: 'Improves Power per Click.',
-                baseCost: 15,
-                basePower: 1,
-                level: 0,
-                type: 'ppc',
-            },
-            wizard: {
-                name: 'Hired Wizard',
-                description: 'Generates Power per Second.',
-                baseCost: 50,
-                basePower: 1,
-                level: 0,
-                type: 'pps',
-            },
-            tome: {
-                name: 'Forbidden Tome',
-                description: 'Boosts Power per Click significantly.',
-                baseCost: 1000,
-                basePower: 10,
-                level: 0,
-                type: 'ppc',
-            },
-            leyline: {
-                name: 'Ley Line Siphon',
-                description: 'Generates massive Power per Second.',
-                baseCost: 2500,
-                basePower: 20,
-                level: 0,
-                type: 'pps',
+            // --- Infinite Canvas State ---
+            let cameraOffset = { x: 0, y: 0 };
+            let cameraZoom = 1;
+            const MAX_ZOOM = 5;
+            const MIN_ZOOM = 0.1;
+            const SCROLL_SENSITIVITY = 0.001;
+
+            // --- WebSocket Connection ---
+            let socket;
+            function connectWebSocket() {
+                // The WebSocket URL for your deployed Cloudflare Worker.
+                // It uses 'wss://' which is the secure version of WebSockets.
+                const wsUrl = 'wss://collaborative-whiteboard-backend.lolbiggerestlol.workers.dev/api/websocket';
+                
+                socket = new WebSocket(wsUrl);
+
+                socket.onopen = () => {
+                    console.log('WebSocket connection established.');
+                };
+
+                socket.onmessage = (event) => {
+                    const message = JSON.parse(event.data);
+                    if (message.type === 'history') {
+                        // Received full history from server on connect
+                        lineHistory = message.data;
+                        requestAnimationFrame(drawScene);
+                    } else if (message.type === 'draw') {
+                        // Received a new line from another client
+                        lineHistory.push(message.data);
+                        requestAnimationFrame(() => drawLine(message.data));
+                    }
+                };
+
+                socket.onclose = () => {
+                    console.log('WebSocket connection closed. Attempting to reconnect...');
+                    // Simple reconnection logic
+                    setTimeout(connectWebSocket, 2000);
+                };
+
+                socket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                };
             }
-        };
+            
+            connectWebSocket();
 
-        // --- DOM ELEMENTS ---
-        const coreClicker = document.getElementById('core-clicker');
-        const powerStat = document.getElementById('power-stat');
-        const ppcStat = document.getElementById('ppc-stat');
-        const ppsStat = document.getElementById('pps-stat');
-        const rebirthsStat = document.getElementById('rebirths-stat');
-        const essenceStat = document.getElementById('essence-stat');
-        const bonusStat = document.getElementById('bonus-stat');
-        const upgradesContainer = document.getElementById('upgrades-container');
-        const rebirthBtn = document.getElementById('rebirth-btn');
-        const rebirthCostInfo = document.getElementById('rebirth-cost-info');
-
-        // --- UTILITY FUNCTIONS ---
-        const formatNumber = (num) => {
-            if (num < 1e3) return num.toFixed(0);
-            if (num < 1e6) return (num / 1e3).toFixed(2) + 'K';
-            if (num < 1e9) return (num / 1e6).toFixed(2) + 'M';
-            if (num < 1e12) return (num / 1e9).toFixed(2) + 'B';
-            return num.toExponential(2);
-        };
-
-        const calculateCost = (baseCost, level) => {
-            return Math.floor(baseCost * Math.pow(1.15, level));
-        };
-        
-        const getGlobalBonus = () => {
-            // Each essence gives a 5% additive bonus
-            return 1 + (gameState.essence * 0.05);
-        };
-        
-        // --- PARTICLE EFFECTS ---
-        function createClickEffects(e) {
-            // Floating Number
-            const number = document.createElement('div');
-            number.className = 'floating-number';
-            number.textContent = `+${formatNumber(gameState.powerPerClick * getGlobalBonus())}`;
-            number.style.left = `${e.clientX}px`;
-            number.style.top = `${e.clientY}px`;
-            document.body.appendChild(number);
-            setTimeout(() => number.remove(), 1000);
-
-            // Particle Burst
-            for (let i = 0; i < 10; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'click-particle';
-                const angle = Math.random() * 2 * Math.PI;
-                const distance = Math.random() * 40 + 20;
-                particle.style.setProperty('--x', `${Math.cos(angle) * distance}px`);
-                particle.style.setProperty('--y', `${Math.sin(angle) * distance}px`);
-                particle.style.left = `${e.clientX}px`;
-                particle.style.top = `${e.clientY}px`;
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 1000);
-            }
-        }
-
-        // --- UI & SHOP ---
-        function updateUI() {
-            const globalBonus = getGlobalBonus();
-            powerStat.textContent = formatNumber(gameState.power);
-            ppcStat.textContent = formatNumber(gameState.powerPerClick * globalBonus);
-            ppsStat.textContent = formatNumber(gameState.powerPerSecond * globalBonus);
-            rebirthsStat.textContent = gameState.rebirths;
-            essenceStat.textContent = gameState.essence;
-            bonusStat.textContent = `+${((globalBonus - 1) * 100).toFixed(0)}%`;
-
-            // Update upgrade buttons
-            for (const key in upgrades) {
-                const upgrade = upgrades[key];
-                const btn = document.getElementById(`upgrade-${key}`);
-                const cost = calculateCost(upgrade.baseCost, upgrade.level);
-                if (gameState.power >= cost) {
-                    btn.disabled = false;
-                } else {
-                    btn.disabled = true;
+            // --- Drawing Logic ---
+            let lastPos = { x: 0, y: 0 };
+            
+            function getEventLocation(e) {
+                if (e.touches && e.touches.length === 1) {
+                    return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                } else if (e.clientX && e.clientY) {
+                    return { x: e.clientX, y: e.clientY };
                 }
+                return null;
             }
 
-            // Update rebirth button
-            rebirthBtn.disabled = gameState.power < REBIRTH_COST;
-        }
+            function drawLine({ x0, y0, x1, y1, color, size }) {
+                ctx.save();
+                // Apply transformations before drawing
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.scale(cameraZoom, cameraZoom);
+                ctx.translate(-canvas.width / 2 + cameraOffset.x, -canvas.height / 2 + cameraOffset.y);
+                
+                ctx.beginPath();
+                ctx.moveTo(x0, y0);
+                ctx.lineTo(x1, y1);
+                ctx.strokeStyle = color;
+                ctx.lineWidth = size;
+                ctx.lineCap = 'round';
+                ctx.stroke();
 
-        function initShop() {
-            upgradesContainer.innerHTML = '';
-            for (const key in upgrades) {
-                const upgrade = upgrades[key];
-                const cost = calculateCost(upgrade.baseCost, upgrade.level);
-
-                const btn = document.createElement('button');
-                btn.id = `upgrade-${key}`;
-                btn.className = 'upgrade-btn';
-                btn.innerHTML = `
-                    ${upgrade.name} (Lvl ${upgrade.level})
-                    <span class="upgrade-info">Cost: ${formatNumber(cost)} | +${formatNumber(upgrade.basePower)} ${upgrade.type.toUpperCase()}</span>
-                `;
-                btn.onclick = () => buyUpgrade(key);
-                upgradesContainer.appendChild(btn);
+                ctx.restore();
             }
-        }
-        
-        function updateShopItem(key) {
-             const upgrade = upgrades[key];
-             const cost = calculateCost(upgrade.baseCost, upgrade.level);
-             const btn = document.getElementById(`upgrade-${key}`);
-             btn.innerHTML = `
-                ${upgrade.name} (Lvl ${upgrade.level})
-                <span class="upgrade-info">Cost: ${formatNumber(cost)} | +${formatNumber(upgrade.basePower)} ${upgrade.type.toUpperCase()}</span>
-             `;
-        }
 
-        // --- GAME LOGIC ---
-        function buyUpgrade(key) {
-            const upgrade = upgrades[key];
-            const cost = calculateCost(upgrade.baseCost, upgrade.level);
+            function startDrawing(e) {
+                const pos = getEventLocation(e);
+                if (!pos) return;
 
-            if (gameState.power >= cost) {
-                gameState.power -= cost;
-                upgrade.level++;
-                if (upgrade.type === 'ppc') {
-                    gameState.powerPerClick += upgrade.basePower;
-                } else if (upgrade.type === 'pps') {
-                    gameState.powerPerSecond += upgrade.basePower;
+                drawing = true;
+                lastPos = getWorldPosition(pos);
+            }
+
+            function stopDrawing() {
+                drawing = false;
+            }
+
+            function draw(e) {
+                if (!drawing) return;
+                
+                const pos = getEventLocation(e);
+                if (!pos) return;
+                
+                const currentPos = getWorldPosition(pos);
+                
+                const line = {
+                    x0: lastPos.x,
+                    y0: lastPos.y,
+                    x1: currentPos.x,
+                    y1: currentPos.y,
+                    color: currentColor,
+                    size: currentBrushSize
+                };
+
+                // Draw locally immediately for responsiveness and add to local history
+                lineHistory.push(line);
+                requestAnimationFrame(() => drawLine(line));
+
+                // Send to server to broadcast
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ type: 'draw', data: line }));
                 }
-                updateShopItem(key);
-            }
-        }
-        
-        function performRebirth() {
-            if (gameState.power >= REBIRTH_COST) {
-                // Calculate essence gained - e.g., 1 essence per magnitude of power
-                const essenceGained = Math.floor(Math.log10(gameState.power / REBIRTH_COST)) + 1;
-                
-                // Reset core stats
-                gameState.power = 0;
-                gameState.powerPerClick = 1;
-                gameState.powerPerSecond = 0;
-                
-                // Add rebirth progress
-                gameState.rebirths++;
-                gameState.essence += essenceGained;
-                
-                // Reset upgrade levels
-                for (const key in upgrades) {
-                    upgrades[key].level = 0;
-                }
-                
-                // Re-initialize the shop to show reset levels and costs
-                initShop();
-                alert(`🌀 Rebirth Complete! 🌀\nYou gained ${essenceGained} Essence for a permanent bonus!`);
-            }
-        }
 
-        // --- EVENT LISTENERS & GAME LOOP ---
-        coreClicker.addEventListener('click', (e) => {
-            gameState.power += gameState.powerPerClick * getGlobalBonus();
-            createClickEffects(e);
-            updateUI();
+                lastPos = currentPos;
+            }
+
+            // --- Canvas Sizing and Scene Drawing ---
+            function resizeCanvas() {
+                canvas.width = canvasContainer.offsetWidth;
+                canvas.height = canvasContainer.offsetHeight;
+                requestAnimationFrame(drawScene);
+            }
+
+            function drawScene() {
+                // Clear canvas completely
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Redraw all lines from history with current transformations
+                lineHistory.forEach(line => drawLine(line));
+            }
+
+            // --- World/Screen Position Conversion ---
+            function getWorldPosition({ x, y }) {
+                const worldX = (x - canvas.width / 2) / cameraZoom + (canvas.width / 2 - cameraOffset.x);
+                const worldY = (y - canvas.height / 2) / cameraZoom + (canvas.height / 2 - cameraOffset.y);
+                return { x: worldX, y: worldY };
+            }
+
+            // --- Event Listeners ---
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseleave', stopDrawing);
+            canvas.addEventListener('mousemove', draw);
+
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, { passive: false });
+            canvas.addEventListener('touchend', (e) => { e.preventDefault(); stopDrawing(e); }, { passive: false });
+            canvas.addEventListener('touchcancel', (e) => { e.preventDefault(); stopDrawing(e); }, { passive: false });
+            canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
+
+            // --- Panning and Zooming ---
+            let isPanning = false;
+            let panStart = { x: 0, y: 0 };
+
+            canvas.addEventListener('mousedown', (e) => {
+                // Pan with middle mouse button or Ctrl + Left Click
+                if (e.button === 1 || e.ctrlKey) {
+                    isPanning = true;
+                    panStart.x = e.clientX - cameraOffset.x;
+                    panStart.y = e.clientY - cameraOffset.y;
+                    canvas.style.cursor = 'grabbing';
+                }
+            });
+            
+            canvas.addEventListener('mousemove', (e) => {
+                if (isPanning) {
+                    cameraOffset.x = e.clientX - panStart.x;
+                    cameraOffset.y = e.clientY - panStart.y;
+                    requestAnimationFrame(drawScene);
+                }
+            });
+
+            window.addEventListener('mouseup', (e) => {
+                if (isPanning) {
+                    isPanning = false;
+                    canvas.style.cursor = 'crosshair';
+                }
+            });
+
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const zoomAmount = e.deltaY * SCROLL_SENSITIVITY;
+                
+                const mousePos = {x: e.clientX, y: e.clientY};
+                const worldPosBeforeZoom = getWorldPosition(mousePos);
+
+                cameraZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, cameraZoom - zoomAmount));
+                
+                const worldPosAfterZoom = getWorldPosition(mousePos);
+
+                cameraOffset.x += (worldPosAfterZoom.x - worldPosBeforeZoom.x);
+                cameraOffset.y += (worldPosAfterZoom.y - worldPosBeforeZoom.y);
+
+                requestAnimationFrame(drawScene);
+            });
+
+            // --- Toolbar Logic ---
+            toolbar.addEventListener('click', (e) => {
+                if (e.target.dataset.color) {
+                    currentColor = e.target.dataset.color;
+                    document.querySelectorAll('.color-swatch').forEach(swatch => swatch.classList.remove('active'));
+                    e.target.classList.add('active');
+                }
+            });
+            
+            document.getElementById('brushSize').addEventListener('input', (e) => {
+                currentBrushSize = e.target.value;
+            });
+
+            // --- Initial Setup ---
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
         });
-        
-        rebirthBtn.addEventListener('click', performRebirth);
-
-        function gameLoop() {
-            gameState.power += (gameState.powerPerSecond / 10) * getGlobalBonus(); // Divided by 10 because loop runs 10x per sec
-            updateUI();
-        }
-
-        // --- INITIALIZATION ---
-        initShop();
-        setInterval(gameLoop, 100); // Main game loop runs every 100ms
-        
-        // Load from localStorage (optional persistence)
-        // window.onload = () => {
-        //     const savedState = JSON.parse(localStorage.getItem('arcaneCoreSave'));
-        //     if (savedState) {
-        //         gameState = savedState;
-        //         // also need to load upgrade levels
-        //     }
-        //     initShop();
-        // };
-        //
-        // window.onbeforeunload = () => {
-        //     localStorage.setItem('arcaneCoreSave', JSON.stringify(gameState));
-        // };
-
     </script>
 </body>
 </html>
