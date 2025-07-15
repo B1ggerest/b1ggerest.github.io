@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Infinite Whiteboard Universe</title>
+    <title>🚀 Epic Whiteboard Universe</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
         
@@ -18,7 +18,6 @@
             background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
             overflow: hidden;
             color: #fff;
-            cursor: none;
         }
         
         .universe-container {
@@ -33,20 +32,12 @@
                 radial-gradient(circle at 40% 40%, rgba(120, 255, 198, 0.1) 0%, transparent 50%);
         }
         
-        #infinite-canvas {
+        #epic-canvas {
             position: absolute;
-            cursor: none;
-            image-rendering: pixelated;
-        }
-        
-        .ui-overlay {
-            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1000;
+            cursor: crosshair;
+            background: rgba(255, 255, 255, 0.05);
         }
         
         .toolbar {
@@ -62,8 +53,7 @@
             border-radius: 25px;
             border: 2px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            pointer-events: all;
-            z-index: 1001;
+            z-index: 1000;
         }
         
         .tool-btn {
@@ -79,7 +69,6 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            pointer-events: all;
         }
         
         .tool-btn:hover {
@@ -94,24 +83,6 @@
             transform: scale(1.1);
         }
         
-        .tool-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.3s ease;
-        }
-        
-        .tool-btn:active::before {
-            width: 100%;
-            height: 100%;
-        }
-        
         .brush-controls {
             display: flex;
             align-items: center;
@@ -119,7 +90,6 @@
             background: rgba(0, 0, 0, 0.6);
             padding: 10px 15px;
             border-radius: 15px;
-            pointer-events: all;
         }
         
         .brush-size-slider {
@@ -144,7 +114,6 @@
         .color-palette {
             display: flex;
             gap: 8px;
-            pointer-events: all;
         }
         
         .color-btn {
@@ -154,7 +123,6 @@
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
         }
         
         .color-btn:hover {
@@ -177,62 +145,27 @@
             padding: 15px 20px;
             border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: all;
-            z-index: 1001;
-        }
-        
-        .coordinates {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(20px);
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-family: 'Orbitron', monospace;
-            font-size: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-            z-index: 1001;
+            z-index: 1000;
         }
         
         .player-cursor {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            pointer-events: none;
-            z-index: 999;
-            transition: transform 0.1s ease;
-        }
-        
-        .cursor-trail {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: currentColor;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             pointer-events: none;
-            opacity: 0.7;
-            animation: trailFade 1s ease-out forwards;
-        }
-        
-        @keyframes trailFade {
-            0% { opacity: 0.7; transform: scale(1); }
-            100% { opacity: 0; transform: scale(0); }
-        }
-        
-        .explosion {
-            position: absolute;
-            pointer-events: none;
-            z-index: 998;
+            z-index: 999;
+            transition: all 0.1s ease;
+            border: 2px solid #fff;
         }
         
         .particle {
             position: absolute;
-            width: 4px;
-            height: 4px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             pointer-events: none;
+            z-index: 998;
         }
         
         @keyframes explode {
@@ -243,6 +176,17 @@
             100% {
                 opacity: 0;
                 transform: scale(0);
+            }
+        }
+        
+        @keyframes sparkle {
+            0% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5) rotate(180deg);
             }
         }
         
@@ -295,71 +239,75 @@
             opacity: 0;
             pointer-events: none;
         }
+        
+        .debug {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1001;
+        }
     </style>
 </head>
 <body>
     <div class="loading-screen" id="loadingScreen">
-        <h1 class="loading-title">INFINITE WHITEBOARD</h1>
+        <h1 class="loading-title">EPIC WHITEBOARD</h1>
         <div class="loading-spinner"></div>
         <p style="margin-top: 20px; opacity: 0.7;">Connecting to the universe...</p>
     </div>
 
     <div class="universe-container">
-        <canvas id="infinite-canvas"></canvas>
+        <canvas id="epic-canvas"></canvas>
         
-        <div class="ui-overlay">
-            <div class="toolbar">
-                <div class="tool-btn active" data-tool="brush" title="Brush">🖌️</div>
-                <div class="tool-btn" data-tool="bomb" title="Bomb">💣</div>
-                <div class="tool-btn" data-tool="eraser" title="Eraser">🧽</div>
-                <div class="tool-btn" data-tool="laser" title="Laser">⚡</div>
-                <div class="tool-btn" data-tool="sparkle" title="Sparkles">✨</div>
-                
-                <div class="brush-controls">
-                    <span style="font-size: 12px;">SIZE</span>
-                    <input type="range" class="brush-size-slider" id="brushSize" min="2" max="50" value="8">
-                    <span id="brushSizeValue" style="font-size: 12px; min-width: 25px;">8px</span>
-                </div>
-                
-                <div class="color-palette">
-                    <div class="color-btn active" style="background: #ff6b6b" data-color="#ff6b6b"></div>
-                    <div class="color-btn" style="background: #4ecdc4" data-color="#4ecdc4"></div>
-                    <div class="color-btn" style="background: #45b7d1" data-color="#45b7d1"></div>
-                    <div class="color-btn" style="background: #96ceb4" data-color="#96ceb4"></div>
-                    <div class="color-btn" style="background: #feca57" data-color="#feca57"></div>
-                    <div class="color-btn" style="background: #ff9ff3" data-color="#ff9ff3"></div>
-                    <div class="color-btn" style="background: #54a0ff" data-color="#54a0ff"></div>
-                    <div class="color-btn" style="background: #5f27cd" data-color="#5f27cd"></div>
-                </div>
+        <div class="toolbar">
+            <div class="tool-btn active" data-tool="brush" title="Brush">🖌️</div>
+            <div class="tool-btn" data-tool="bomb" title="Bomb">💣</div>
+            <div class="tool-btn" data-tool="eraser" title="Eraser">🧽</div>
+            <div class="tool-btn" data-tool="laser" title="Laser">⚡</div>
+            <div class="tool-btn" data-tool="sparkle" title="Sparkles">✨</div>
+            
+            <div class="brush-controls">
+                <span style="font-size: 12px;">SIZE</span>
+                <input type="range" class="brush-size-slider" id="brushSize" min="2" max="50" value="8">
+                <span id="brushSizeValue" style="font-size: 12px; min-width: 25px;">8px</span>
             </div>
             
-            <div class="status-panel">
-                <div style="font-size: 14px; margin-bottom: 5px;">🌌 <span id="playerCount">1</span> explorers online</div>
-                <div style="font-size: 12px; opacity: 0.7;" id="connectionStatus">Connected to universe</div>
+            <div class="color-palette">
+                <div class="color-btn active" style="background: #ff6b6b" data-color="#ff6b6b"></div>
+                <div class="color-btn" style="background: #4ecdc4" data-color="#4ecdc4"></div>
+                <div class="color-btn" style="background: #45b7d1" data-color="#45b7d1"></div>
+                <div class="color-btn" style="background: #96ceb4" data-color="#96ceb4"></div>
+                <div class="color-btn" style="background: #feca57" data-color="#feca57"></div>
+                <div class="color-btn" style="background: #ff9ff3" data-color="#ff9ff3"></div>
+                <div class="color-btn" style="background: #54a0ff" data-color="#54a0ff"></div>
+                <div class="color-btn" style="background: #ffffff" data-color="#ffffff"></div>
             </div>
-            
-            <div class="coordinates">
-                <div>X: <span id="coordX">0</span></div>
-                <div>Y: <span id="coordY">0</span></div>
-                <div>Zoom: <span id="zoomLevel">100%</span></div>
-            </div>
+        </div>
+        
+        <div class="status-panel">
+            <div style="font-size: 14px; margin-bottom: 5px;">🌌 <span id="playerCount">1</span> explorers online</div>
+            <div style="font-size: 12px; opacity: 0.7;" id="connectionStatus">Connecting...</div>
         </div>
     </div>
 
+    <div class="debug" id="debug">
+        Canvas: Ready<br>
+        Tool: Brush<br>
+        Connection: Waiting...
+    </div>
+
     <script>
-        class InfiniteWhiteboardUniverse {
+        class EpicWhiteboard {
             constructor() {
-                this.canvas = document.getElementById('infinite-canvas');
+                this.canvas = document.getElementById('epic-canvas');
                 this.ctx = this.canvas.getContext('2d');
                 
-                // Infinite canvas properties
-                this.viewportX = 0;
-                this.viewportY = 0;
-                this.zoom = 1;
-                this.canvasWidth = 10000;
-                this.canvasHeight = 10000;
-                
-                // Drawing state
+                // Simple state
                 this.isDrawing = false;
                 this.currentTool = 'brush';
                 this.currentColor = '#ff6b6b';
@@ -371,27 +319,26 @@
                 this.isConnected = false;
                 this.playerId = this.generatePlayerId();
                 this.playerCursors = new Map();
-                this.mouseX = 0;
-                this.mouseY = 0;
                 
                 // Effects
                 this.particles = [];
-                this.trails = [];
                 
-                // Optimization
-                this.lastCursorBroadcast = 0;
-                this.cursorBroadcastThrottle = 50; // ms
+                // Debug
+                this.debug = document.getElementById('debug');
+                
+                console.log('🚀 Initializing Epic Whiteboard...');
                 
                 this.setupCanvas();
                 this.setupUI();
-                this.setupEventListeners();
+                this.setupEvents();
                 this.connectToServer();
                 this.startAnimationLoop();
                 
-                // Hide loading screen after setup
+                // Hide loading screen
                 setTimeout(() => {
                     document.getElementById('loadingScreen').classList.add('hidden');
-                }, 2000);
+                    this.updateDebug('Canvas: Ready, Tool: Brush, Connection: ' + (this.isConnected ? 'Connected' : 'Connecting...'));
+                }, 1000);
             }
             
             generatePlayerId() {
@@ -399,17 +346,24 @@
             }
             
             setupCanvas() {
-                this.resizeCanvas();
+                // Simple canvas setup
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                
                 this.ctx.lineCap = 'round';
                 this.ctx.lineJoin = 'round';
                 this.ctx.imageSmoothingEnabled = true;
                 
-                window.addEventListener('resize', () => this.resizeCanvas());
-            }
-            
-            resizeCanvas() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
+                // Fill with slight background
+                this.ctx.fillStyle = 'rgba(10, 10, 30, 0.1)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                window.addEventListener('resize', () => {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                });
+                
+                console.log('✅ Canvas setup complete');
             }
             
             setupUI() {
@@ -419,7 +373,8 @@
                         document.querySelector('.tool-btn.active').classList.remove('active');
                         btn.classList.add('active');
                         this.currentTool = btn.dataset.tool;
-                        this.updateCursor();
+                        this.updateDebug();
+                        console.log('🔧 Tool changed to:', this.currentTool);
                     });
                 });
                 
@@ -429,6 +384,7 @@
                         document.querySelector('.color-btn.active').classList.remove('active');
                         btn.classList.add('active');
                         this.currentColor = btn.dataset.color;
+                        console.log('🎨 Color changed to:', this.currentColor);
                     });
                 });
                 
@@ -440,12 +396,14 @@
                     this.currentSize = parseInt(brushSize.value);
                     brushSizeValue.textContent = `${brushSize.value}px`;
                 });
+                
+                console.log('✅ UI setup complete');
             }
             
-            setupEventListeners() {
+            setupEvents() {
                 // Mouse events
                 this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
-                this.canvas.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                this.canvas.addEventListener('mousemove', this.draw.bind(this));
                 this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
                 this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
                 
@@ -454,108 +412,22 @@
                 this.canvas.addEventListener('touchmove', this.handleTouch.bind(this));
                 this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
                 
-                // Keyboard shortcuts
-                window.addEventListener('keydown', this.handleKeyboard.bind(this));
-                
-                // Pan and zoom
-                this.canvas.addEventListener('wheel', this.handleWheel.bind(this));
-                
-                // Middle mouse drag for panning
-                let isPanning = false;
-                let lastPanX = 0;
-                let lastPanY = 0;
-                
-                this.canvas.addEventListener('mousedown', (e) => {
-                    if (e.button === 1) { // Middle mouse
-                        isPanning = true;
-                        lastPanX = e.clientX;
-                        lastPanY = e.clientY;
-                        e.preventDefault();
-                    }
-                });
-                
-                this.canvas.addEventListener('mousemove', (e) => {
-                    if (isPanning) {
-                        const deltaX = e.clientX - lastPanX;
-                        const deltaY = e.clientY - lastPanY;
-                        this.viewportX -= deltaX / this.zoom;
-                        this.viewportY -= deltaY / this.zoom;
-                        lastPanX = e.clientX;
-                        lastPanY = e.clientY;
-                        this.updateCoordinates();
-                    }
-                });
-                
-                this.canvas.addEventListener('mouseup', (e) => {
-                    if (e.button === 1) {
-                        isPanning = false;
-                    }
-                });
+                console.log('✅ Events setup complete');
             }
             
-            updateCursor() {
-                const cursors = {
-                    brush: 'crosshair',
-                    bomb: 'pointer',
-                    eraser: 'grab',
-                    laser: 'crosshair',
-                    sparkle: 'pointer'
-                };
-                this.canvas.style.cursor = cursors[this.currentTool] || 'crosshair';
-            }
-            
-            getWorldCoordinates(clientX, clientY) {
+            getMousePos(e) {
                 const rect = this.canvas.getBoundingClientRect();
-                const x = (clientX - rect.left) / this.zoom + this.viewportX;
-                const y = (clientY - rect.top) / this.zoom + this.viewportY;
-                return [x, y];
-            }
-            
-            getScreenCoordinates(worldX, worldY) {
-                const x = (worldX - this.viewportX) * this.zoom;
-                const y = (worldY - this.viewportY) * this.zoom;
-                return [x, y];
-            }
-            
-            handleMouseMove(e) {
-                const [worldX, worldY] = this.getWorldCoordinates(e.clientX, e.clientY);
-                this.mouseX = worldX;
-                this.mouseY = worldY;
-                
-                this.updateCoordinates();
-                this.broadcastCursor();
-                
-                if (this.isDrawing) {
-                    this.draw(e);
-                }
-            }
-            
-            updateCoordinates() {
-                document.getElementById('coordX').textContent = Math.round(this.mouseX);
-                document.getElementById('coordY').textContent = Math.round(this.mouseY);
-                document.getElementById('zoomLevel').textContent = Math.round(this.zoom * 100) + '%';
-            }
-            
-            broadcastCursor() {
-                const now = Date.now();
-                if (now - this.lastCursorBroadcast > this.cursorBroadcastThrottle) {
-                    this.sendMessage({
-                        type: 'cursor',
-                        playerId: this.playerId,
-                        x: this.mouseX,
-                        y: this.mouseY,
-                        tool: this.currentTool,
-                        color: this.currentColor
-                    });
-                    this.lastCursorBroadcast = now;
-                }
+                return [
+                    e.clientX - rect.left,
+                    e.clientY - rect.top
+                ];
             }
             
             startDrawing(e) {
-                if (e.button !== 0) return; // Only left mouse
-                
                 this.isDrawing = true;
-                const [x, y] = this.getWorldCoordinates(e.clientX, e.clientY);
+                const [x, y] = this.getMousePos(e);
+                
+                console.log(`🎯 Start drawing with ${this.currentTool} at (${x}, ${y})`);
                 
                 if (this.currentTool === 'bomb') {
                     this.createBomb(x, y);
@@ -585,13 +457,13 @@
             draw(e) {
                 if (!this.isDrawing) return;
                 
-                const [currentX, currentY] = this.getWorldCoordinates(e.clientX, e.clientY);
+                const [currentX, currentY] = this.getMousePos(e);
                 const lastPoint = this.currentStroke[this.currentStroke.length - 1];
                 
-                // Draw locally for immediate feedback
-                this.drawStrokeSegment(lastPoint.x, lastPoint.y, currentX, currentY, this.currentTool, this.currentColor, this.currentSize);
+                // Draw locally immediately
+                this.drawLine(lastPoint.x, lastPoint.y, currentX, currentY, this.currentTool, this.currentColor, this.currentSize);
                 
-                // Add point to stroke
+                // Add to stroke
                 this.currentStroke.push({
                     x: currentX,
                     y: currentY,
@@ -599,11 +471,6 @@
                     color: this.currentColor,
                     size: this.currentSize
                 });
-                
-                // Create trail for brush
-                if (this.currentTool === 'brush') {
-                    this.createTrail(currentX, currentY, this.currentColor);
-                }
             }
             
             stopDrawing() {
@@ -611,8 +478,9 @@
                 
                 this.isDrawing = false;
                 
-                // Send complete stroke
+                // Send stroke to server
                 if (this.currentStroke.length > 1) {
+                    console.log('📤 Sending stroke with', this.currentStroke.length, 'points');
                     this.sendMessage({
                         type: 'stroke',
                         stroke: this.currentStroke,
@@ -623,11 +491,8 @@
                 this.currentStroke = [];
             }
             
-            drawStrokeSegment(fromX, fromY, toX, toY, tool, color, size) {
+            drawLine(fromX, fromY, toX, toY, tool, color, size) {
                 this.ctx.save();
-                
-                // Transform to screen coordinates
-                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
                 
                 if (tool === 'eraser') {
                     this.ctx.globalCompositeOperation = 'destination-out';
@@ -635,6 +500,12 @@
                 } else {
                     this.ctx.globalCompositeOperation = 'source-over';
                     this.ctx.strokeStyle = color;
+                    
+                    // Add glow effect for some tools
+                    if (tool === 'laser') {
+                        this.ctx.shadowBlur = 10;
+                        this.ctx.shadowColor = color;
+                    }
                 }
                 
                 this.ctx.lineWidth = size;
@@ -647,10 +518,34 @@
             }
             
             createBomb(x, y) {
-                // Create explosion effect
-                this.createExplosion(x, y);
+                console.log('💣 Creating bomb at', x, y);
                 
-                // Send bomb to server
+                // Create explosion particles
+                for (let i = 0; i < 20; i++) {
+                    const angle = (Math.PI * 2 * i) / 20;
+                    const velocity = 2 + Math.random() * 3;
+                    
+                    this.particles.push({
+                        x: x,
+                        y: y,
+                        vx: Math.cos(angle) * velocity,
+                        vy: Math.sin(angle) * velocity,
+                        life: 1000,
+                        maxLife: 1000,
+                        color: `hsl(${Math.random() * 60 + 10}, 100%, 60%)`,
+                        type: 'explosion'
+                    });
+                }
+                
+                // Clear area locally
+                this.ctx.save();
+                this.ctx.globalCompositeOperation = 'destination-out';
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, this.currentSize * 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+                
+                // Send to server
                 this.sendMessage({
                     type: 'bomb',
                     x: x,
@@ -658,58 +553,20 @@
                     size: this.currentSize * 3,
                     playerId: this.playerId
                 });
-                
-                // Clear area locally
-                this.ctx.save();
-                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
-                this.ctx.globalCompositeOperation = 'destination-out';
-                this.ctx.beginPath();
-                this.ctx.arc(x, y, this.currentSize * 3, 0, Math.PI * 2);
-                this.ctx.fill();
-                this.ctx.restore();
-            }
-            
-            createExplosion(x, y) {
-                const [screenX, screenY] = this.getScreenCoordinates(x, y);
-                const particleCount = 30;
-                
-                for (let i = 0; i < particleCount; i++) {
-                    const angle = (Math.PI * 2 * i) / particleCount;
-                    const velocity = 2 + Math.random() * 4;
-                    const life = 1000 + Math.random() * 500;
-                    
-                    this.particles.push({
-                        x: screenX,
-                        y: screenY,
-                        vx: Math.cos(angle) * velocity,
-                        vy: Math.sin(angle) * velocity,
-                        life: life,
-                        maxLife: life,
-                        color: `hsl(${Math.random() * 60 + 10}, 100%, 60%)`
-                    });
-                }
             }
             
             createLaser(x, y) {
-                // Create instant laser effect across screen
+                console.log('⚡ Creating laser from', x, y);
+                
                 const angle = Math.random() * Math.PI * 2;
-                const distance = 1000;
+                const distance = 500;
                 const endX = x + Math.cos(angle) * distance;
                 const endY = y + Math.sin(angle) * distance;
                 
-                // Draw laser line
-                this.ctx.save();
-                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
-                this.ctx.strokeStyle = this.currentColor;
-                this.ctx.lineWidth = this.currentSize / 2;
-                this.ctx.shadowBlur = 20;
-                this.ctx.shadowColor = this.currentColor;
-                this.ctx.beginPath();
-                this.ctx.moveTo(x, y);
-                this.ctx.lineTo(endX, endY);
-                this.ctx.stroke();
-                this.ctx.restore();
+                // Draw laser locally
+                this.drawLine(x, y, endX, endY, 'laser', this.currentColor, this.currentSize);
                 
+                // Send to server
                 this.sendMessage({
                     type: 'laser',
                     fromX: x,
@@ -722,41 +579,31 @@
             }
             
             createSparkles(x, y) {
-                const [screenX, screenY] = this.getScreenCoordinates(x, y);
+                console.log('✨ Creating sparkles at', x, y);
                 
-                for (let i = 0; i < 15; i++) {
-                    const offsetX = (Math.random() - 0.5) * 50;
-                    const offsetY = (Math.random() - 0.5) * 50;
+                // Create sparkle particles
+                for (let i = 0; i < 10; i++) {
+                    const offsetX = (Math.random() - 0.5) * 40;
+                    const offsetY = (Math.random() - 0.5) * 40;
                     
                     this.particles.push({
-                        x: screenX + offsetX,
-                        y: screenY + offsetY,
-                        vx: (Math.random() - 0.5) * 2,
-                        vy: (Math.random() - 0.5) * 2,
-                        life: 2000,
-                        maxLife: 2000,
+                        x: x + offsetX,
+                        y: y + offsetY,
+                        vx: (Math.random() - 0.5),
+                        vy: (Math.random() - 0.5),
+                        life: 1500,
+                        maxLife: 1500,
                         color: this.currentColor,
-                        sparkle: true
+                        type: 'sparkle'
                     });
                 }
                 
+                // Send to server
                 this.sendMessage({
                     type: 'sparkle',
                     x: x,
                     y: y,
                     color: this.currentColor
-                });
-            }
-            
-            createTrail(x, y, color) {
-                const [screenX, screenY] = this.getScreenCoordinates(x, y);
-                
-                this.trails.push({
-                    x: screenX,
-                    y: screenY,
-                    color: color,
-                    life: 500,
-                    maxLife: 500
                 });
             }
             
@@ -768,80 +615,48 @@
                     e.type === 'touchmove' ? 'mousemove' : 'mouseup',
                     {
                         clientX: touch.clientX,
-                        clientY: touch.clientY,
-                        button: 0
+                        clientY: touch.clientY
                     }
                 );
                 this.canvas.dispatchEvent(mouseEvent);
             }
             
-            handleKeyboard(e) {
-                switch(e.code) {
-                    case 'Digit1': this.switchTool('brush'); break;
-                    case 'Digit2': this.switchTool('bomb'); break;
-                    case 'Digit3': this.switchTool('eraser'); break;
-                    case 'Digit4': this.switchTool('laser'); break;
-                    case 'Digit5': this.switchTool('sparkle'); break;
-                    case 'Space': 
-                        e.preventDefault();
-                        this.clearCanvas();
-                        break;
-                }
-            }
-            
-            switchTool(tool) {
-                document.querySelector('.tool-btn.active').classList.remove('active');
-                document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
-                this.currentTool = tool;
-                this.updateCursor();
-            }
-            
-            handleWheel(e) {
-                e.preventDefault();
-                const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
-                const newZoom = Math.max(0.1, Math.min(5, this.zoom * zoomFactor));
-                
-                // Zoom towards mouse position
-                const [worldX, worldY] = this.getWorldCoordinates(e.clientX, e.clientY);
-                
-                this.zoom = newZoom;
-                
-                // Adjust viewport to keep mouse position steady
-                const [newWorldX, newWorldY] = this.getWorldCoordinates(e.clientX, e.clientY);
-                this.viewportX += worldX - newWorldX;
-                this.viewportY += worldY - newWorldY;
-                
-                this.updateCoordinates();
-            }
-            
-            clearCanvas() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.sendMessage({ type: 'clear' });
-            }
-            
             connectToServer() {
                 try {
+                    console.log('🔌 Connecting to server...');
                     this.ws = new WebSocket('wss://whiteboardbackend.lolbiggerestlol.workers.dev/');
                     
                     this.ws.onopen = () => {
                         this.isConnected = true;
                         document.getElementById('connectionStatus').textContent = 'Connected to universe';
-                        console.log('Connected to infinite whiteboard universe');
+                        this.updateDebug();
+                        console.log('✅ Connected to server');
                     };
                     
                     this.ws.onmessage = (event) => {
-                        const data = JSON.parse(event.data);
-                        this.handleServerMessage(data);
+                        try {
+                            const data = JSON.parse(event.data);
+                            console.log('📨 Received:', data.type);
+                            this.handleServerMessage(data);
+                        } catch (error) {
+                            console.error('❌ Error parsing message:', error);
+                        }
                     };
                     
                     this.ws.onclose = () => {
                         this.isConnected = false;
                         document.getElementById('connectionStatus').textContent = 'Disconnected - Reconnecting...';
+                        this.updateDebug();
+                        console.log('🔌 Disconnected, reconnecting...');
                         setTimeout(() => this.connectToServer(), 3000);
                     };
                     
+                    this.ws.onerror = (error) => {
+                        console.error('❌ WebSocket error:', error);
+                    };
+                    
                 } catch (error) {
-                    console.error('Connection failed:', error);
+                    console.error('❌ Failed to connect:', error);
                     document.getElementById('connectionStatus').textContent = 'Connection failed';
                 }
             }
@@ -852,7 +667,9 @@
                         this.drawRemoteStroke(data.stroke);
                         break;
                     case 'bomb':
-                        this.handleRemoteBomb(data);
+                        if (data.playerId !== this.playerId) {
+                            this.handleRemoteBomb(data);
+                        }
                         break;
                     case 'laser':
                         this.drawRemoteLaser(data);
@@ -860,11 +677,8 @@
                     case 'sparkle':
                         this.handleRemoteSparkle(data);
                         break;
-                    case 'cursor':
-                        this.updatePlayerCursor(data);
-                        break;
                     case 'clear':
-                        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                        this.clearCanvas();
                         break;
                     case 'users_count':
                         document.getElementById('playerCount').textContent = data.count;
@@ -876,12 +690,12 @@
             }
             
             drawRemoteStroke(stroke) {
-                if (stroke.length < 2) return;
+                if (!stroke || stroke.length < 2) return;
                 
-                this.ctx.save();
-                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
+                console.log('🎨 Drawing remote stroke with', stroke.length, 'points');
                 
                 const firstPoint = stroke[0];
+                this.ctx.save();
                 
                 if (firstPoint.tool === 'eraser') {
                     this.ctx.globalCompositeOperation = 'destination-out';
@@ -904,70 +718,71 @@
             }
             
             handleRemoteBomb(data) {
-                if (data.playerId !== this.playerId) {
-                    // Create explosion effect
-                    this.createExplosion(data.x, data.y);
+                console.log('💥 Remote bomb exploded');
+                
+                // Create explosion
+                for (let i = 0; i < 20; i++) {
+                    const angle = (Math.PI * 2 * i) / 20;
+                    const velocity = 2 + Math.random() * 3;
                     
-                    // Clear area
-                    this.ctx.save();
-                    this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
-                    this.ctx.globalCompositeOperation = 'destination-out';
-                    this.ctx.beginPath();
-                    this.ctx.arc(data.x, data.y, data.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                    this.ctx.restore();
+                    this.particles.push({
+                        x: data.x,
+                        y: data.y,
+                        vx: Math.cos(angle) * velocity,
+                        vy: Math.sin(angle) * velocity,
+                        life: 1000,
+                        maxLife: 1000,
+                        color: `hsl(${Math.random() * 60 + 10}, 100%, 60%)`,
+                        type: 'explosion'
+                    });
                 }
-            }
-            
-            drawRemoteLaser(data) {
+                
+                // Clear area
                 this.ctx.save();
-                this.ctx.setTransform(this.zoom, 0, 0, this.zoom, -this.viewportX * this.zoom, -this.viewportY * this.zoom);
-                this.ctx.strokeStyle = data.color;
-                this.ctx.lineWidth = data.size / 2;
-                this.ctx.shadowBlur = 20;
-                this.ctx.shadowColor = data.color;
+                this.ctx.globalCompositeOperation = 'destination-out';
                 this.ctx.beginPath();
-                this.ctx.moveTo(data.fromX, data.fromY);
-                this.ctx.lineTo(data.toX, data.toY);
-                this.ctx.stroke();
+                this.ctx.arc(data.x, data.y, data.size, 0, Math.PI * 2);
+                this.ctx.fill();
                 this.ctx.restore();
             }
             
+            drawRemoteLaser(data) {
+                console.log('⚡ Drawing remote laser');
+                this.drawLine(data.fromX, data.fromY, data.toX, data.toY, 'laser', data.color, data.size);
+            }
+            
             handleRemoteSparkle(data) {
+                console.log('✨ Remote sparkles');
                 this.createSparkles(data.x, data.y);
             }
             
-            updatePlayerCursor(data) {
-                if (data.playerId === this.playerId) return;
-                
-                this.playerCursors.set(data.playerId, {
-                    x: data.x,
-                    y: data.y,
-                    tool: data.tool,
-                    color: data.color,
-                    lastUpdate: Date.now()
-                });
+            clearCanvas() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                // Restore background
+                this.ctx.fillStyle = 'rgba(10, 10, 30, 0.1)';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             }
             
             loadCanvasState(data) {
-                // Load existing canvas state when joining
+                console.log('📥 Loading canvas state');
                 if (data.strokes) {
-                    data.strokes.forEach(stroke => this.drawRemoteStroke(stroke.stroke || stroke.points));
+                    data.strokes.forEach(strokeData => {
+                        this.drawRemoteStroke(strokeData.stroke);
+                    });
                 }
             }
             
             sendMessage(message) {
                 if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
                     this.ws.send(JSON.stringify(message));
+                } else {
+                    console.log('❌ Cannot send - not connected');
                 }
             }
             
             startAnimationLoop() {
                 const animate = () => {
                     this.updateParticles();
-                    this.updateTrails();
-                    this.renderPlayerCursors();
-                    this.cleanupOldCursors();
                     requestAnimationFrame(animate);
                 };
                 animate();
@@ -977,23 +792,22 @@
                 this.particles = this.particles.filter(particle => {
                     particle.x += particle.vx;
                     particle.y += particle.vy;
-                    particle.life -= 16; // ~60fps
+                    particle.life -= 16;
                     
                     if (particle.life > 0) {
                         const alpha = particle.life / particle.maxLife;
                         
-                        // Render particle
                         this.ctx.save();
                         this.ctx.globalAlpha = alpha;
                         this.ctx.fillStyle = particle.color;
                         
-                        if (particle.sparkle) {
-                            this.ctx.shadowBlur = 10;
+                        if (particle.type === 'sparkle') {
+                            this.ctx.shadowBlur = 5;
                             this.ctx.shadowColor = particle.color;
                         }
                         
                         this.ctx.beginPath();
-                        this.ctx.arc(particle.x, particle.y, 2, 0, Math.PI * 2);
+                        this.ctx.arc(particle.x, particle.y, 3, 0, Math.PI * 2);
                         this.ctx.fill();
                         this.ctx.restore();
                         
@@ -1003,76 +817,26 @@
                 });
             }
             
-            updateTrails() {
-                this.trails = this.trails.filter(trail => {
-                    trail.life -= 16;
-                    
-                    if (trail.life > 0) {
-                        const alpha = trail.life / trail.maxLife;
-                        
-                        this.ctx.save();
-                        this.ctx.globalAlpha = alpha * 0.5;
-                        this.ctx.fillStyle = trail.color;
-                        this.ctx.beginPath();
-                        this.ctx.arc(trail.x, trail.y, 2, 0, Math.PI * 2);
-                        this.ctx.fill();
-                        this.ctx.restore();
-                        
-                        return true;
-                    }
-                    return false;
-                });
-            }
-            
-            renderPlayerCursors() {
-                this.playerCursors.forEach((cursor, playerId) => {
-                    const [screenX, screenY] = this.getScreenCoordinates(cursor.x, cursor.y);
-                    
-                    // Only render if on screen
-                    if (screenX >= -50 && screenX <= this.canvas.width + 50 && 
-                        screenY >= -50 && screenY <= this.canvas.height + 50) {
-                        
-                        this.ctx.save();
-                        this.ctx.fillStyle = cursor.color;
-                        this.ctx.strokeStyle = '#fff';
-                        this.ctx.lineWidth = 2;
-                        
-                        // Draw cursor based on tool
-                        switch(cursor.tool) {
-                            case 'bomb':
-                                this.ctx.font = '20px serif';
-                                this.ctx.fillText('💣', screenX, screenY);
-                                break;
-                            case 'eraser':
-                                this.ctx.beginPath();
-                                this.ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
-                                this.ctx.stroke();
-                                break;
-                            default:
-                                this.ctx.beginPath();
-                                this.ctx.arc(screenX, screenY, 5, 0, Math.PI * 2);
-                                this.ctx.fill();
-                                this.ctx.stroke();
-                        }
-                        
-                        this.ctx.restore();
-                    }
-                });
-            }
-            
-            cleanupOldCursors() {
-                const now = Date.now();
-                this.playerCursors.forEach((cursor, playerId) => {
-                    if (now - cursor.lastUpdate > 5000) { // 5 seconds timeout
-                        this.playerCursors.delete(playerId);
-                    }
-                });
+            updateDebug(custom = null) {
+                if (custom) {
+                    this.debug.innerHTML = custom;
+                } else {
+                    this.debug.innerHTML = `
+                        Canvas: Ready<br>
+                        Tool: ${this.currentTool}<br>
+                        Color: ${this.currentColor}<br>
+                        Size: ${this.currentSize}px<br>
+                        Connection: ${this.isConnected ? 'Connected' : 'Disconnected'}<br>
+                        Players: ${document.getElementById('playerCount').textContent}
+                    `;
+                }
             }
         }
         
         // Initialize when page loads
         window.addEventListener('load', () => {
-            new InfiniteWhiteboardUniverse();
+            console.log('🚀 Starting Epic Whiteboard...');
+            new EpicWhiteboard();
         });
     </script>
 </body>
