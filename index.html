@@ -370,6 +370,7 @@
             }
             
             updateUsersCount() {
+                console.log('Updating users count to:', this.usersCount);
                 const usersSpan = document.getElementById('usersCount');
                 if (this.usersCount > 0) {
                     usersSpan.textContent = `(${this.usersCount} user${this.usersCount === 1 ? '' : 's'} online)`;
