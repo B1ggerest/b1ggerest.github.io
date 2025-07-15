@@ -253,18 +253,23 @@
             }
             
             handleServerMessage(data) {
+                console.log('Handling server message:', data.type);
                 switch (data.type) {
                     case 'draw':
+                        console.log('Drawing remote line:', data);
                         this.drawRemoteLine(data);
                         break;
                     case 'clear':
+                        console.log('Clearing canvas from server');
                         this.clearCanvas();
                         break;
                     case 'users_count':
+                        console.log('Users count update:', data.count);
                         this.usersCount = data.count;
                         this.updateUsersCount();
                         break;
                     case 'canvas_state':
+                        console.log('Loading canvas state, lines:', data.lines.length);
                         this.loadCanvasState(data.lines);
                         break;
                 }
@@ -320,6 +325,7 @@
             }
             
             drawLine(fromX, fromY, toX, toY, color, size) {
+                console.log('Drawing line from', fromX, fromY, 'to', toX, toY, 'color:', color, 'size:', size);
                 this.ctx.strokeStyle = color;
                 this.ctx.lineWidth = size;
                 this.ctx.beginPath();
@@ -329,6 +335,7 @@
             }
             
             drawRemoteLine(data) {
+                console.log('Drawing remote line with data:', data);
                 this.drawLine(data.fromX, data.fromY, data.toX, data.toY, data.color, data.size);
             }
             
