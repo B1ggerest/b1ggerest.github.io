@@ -3,967 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Collaborative Whiteboard</title>
+    <title>🪄 THE CURSED STICK PORTAL 🪄</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
-            background: #f0f0f0;
-            touch-action: none;
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #ff6b6b;
+            overflow-x: hidden;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><text y="15" font-size="16">🪄</text></svg>'), auto;
         }
-        
-        #canvas {
-            display: block;
-            cursor: crosshair;
-            background: white;
-            touch-action: none;
-        }
-        
-        .toolbar {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            z-index: 1000;
-            user-select: none;
-        }
-        
-        .color-picker {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .color-btn {
-            width: 30px;
-            height: 30px;
-            border: 2px solid #ddd;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        
-        .color-btn:hover {
-            transform: scale(1.1);
-        }
-        
-        .color-btn.active {
-            border-color: #333;
-            transform: scale(1.2);
-        }
-        
-        .size-control {
+
+        .container {
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
         }
-        
-        .size-slider {
-            width: 80px;
+
+        .title {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px #ff6b6b;
+            animation: glitch 2s infinite;
         }
-        
-        .action-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            background: #007AFF;
-            color: white;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s;
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            10% { transform: translate(-2px, 2px); }
+            20% { transform: translate(2px, -2px); }
+            30% { transform: translate(-2px, -2px); }
+            40% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, 2px); }
+            60% { transform: translate(2px, -2px); }
+            70% { transform: translate(-2px, -2px); }
+            80% { transform: translate(2px, 2px); }
+            90% { transform: translate(-2px, 2px); }
         }
-        
-        .action-btn:hover {
-            background: #0056CC;
-        }
-        
-        .status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            font-size: 12px;
-            z-index: 1000;
-        }
-        
-        .status.connected {
-            color: #28a745;
-        }
-        
-        .status.disconnected {
-            color: #dc3545;
-        }
-        
-        .zoom-controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
-        
-        .zoom-btn {
-            width: 40px;
-            height: 40px;
-            border: none;
-            border-radius: 50%;
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-            font-size: 18px;
+
+        .stick-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            margin: 20px 0;
+            border: 3px dashed #ff6b6b;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
-        }
-        
-        .zoom-btn:hover {
-            background: #f8f9fa;
+            background: rgba(255, 107, 107, 0.1);
+            cursor: grab;
         }
 
-        .loading {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
+        .stick {
+            width: 20px;
+            height: 200px;
+            background: linear-gradient(45deg, #8b4513, #a0522d);
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            z-index: 2000;
-            display: none;
+            position: relative;
+            transition: all 0.1s ease;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .stick::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ff6b6b;
+        }
+
+        .instructions {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 20px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .counter {
+            font-size: 2em;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #ff6b6b;
+        }
+
+        .message {
+            font-size: 1.5em;
+            text-align: center;
+            margin: 20px 0;
+            height: 60px;
+            animation: flicker 1s infinite;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .cursed-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            animation: float 3s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-100px) rotate(180deg); }
+        }
+
+        .github-section {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 10px;
+            border: 2px solid #ff6b6b;
+        }
+
+        .github-section h3 {
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #ff6b6b;
+        }
+
+        .github-section pre {
+            background: #000;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid #ff6b6b;
+        }
+
+        .image-placeholder {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border: 3px dashed #ff6b6b;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 107, 107, 0.1);
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .stroking {
+            animation: stroke-glow 0.2s infinite;
+        }
+
+        @keyframes stroke-glow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+                background: linear-gradient(45deg, #8b4513, #a0522d);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(255, 107, 107, 1);
+                background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            }
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
+    <div class="cursed-effects" id="effects"></div>
     
-    <div class="toolbar">
-        <div class="color-picker">
-            <div class="color-btn active" style="background: #000" data-color="#000000"></div>
-            <div class="color-btn" style="background: #f00" data-color="#ff0000"></div>
-            <div class="color-btn" style="background: #0f0" data-color="#00ff00"></div>
-            <div class="color-btn" style="background: #00f" data-color="#0000ff"></div>
-            <div class="color-btn" style="background: #ff0" data-color="#ffff00"></div>
-            <div class="color-btn" style="background: #f0f" data-color="#ff00ff"></div>
-            <div class="color-btn" style="background: #0ff" data-color="#00ffff"></div>
+    <div class="container">
+        <h1 class="title">THE CURSED STICK PORTAL</h1>
+        
+        <div class="instructions">
+            STROKE THE STICK UP AND DOWN TO UNLOCK THE ANCIENT POWERS
         </div>
         
-        <div class="size-control">
-            <label>Size</label>
-            <input type="range" class="size-slider" min="1" max="50" value="5" id="brushSize">
-            <span id="sizeValue">5px</span>
+        <div class="stick-container" id="stickContainer">
+            <div class="stick" id="stick"></div>
         </div>
         
-        <button class="action-btn" id="clearBtn">Clear View</button>
+        <div class="counter">
+            Strokes: <span id="strokeCount">0</span>
+        </div>
+        
+        <div class="message" id="message">
+            The stick awaits your touch...
+        </div>
+        
+        <div class="image-placeholder" id="imageContainer">
+            Replace this with your GitHub image URL
+        </div>
+        
+        <div class="github-section">
+            <h3>🔥 HOW TO ADD YOUR CURSED IMAGES 🔥</h3>
+            <p>1. Upload your image to a GitHub repository</p>
+            <p>2. Click "Raw" on the image file</p>
+            <p>3. Copy the URL and replace the image source below:</p>
+            <pre><code>&lt;img src="YOUR_GITHUB_RAW_URL_HERE" alt="cursed image" style="max-width: 100%; border-radius: 10px; box-shadow: 0 0 20px #ff6b6b;"&gt;</code></pre>
+            <p>Example: https://raw.githubusercontent.com/username/repo/main/image.jpg</p>
+        </div>
     </div>
-    
-    <div class="status disconnected" id="status">Connecting...</div>
-    
-    <div class="zoom-controls">
-        <button class="zoom-btn" id="zoomOut">-</button>
-        <button class="zoom-btn" id="zoomIn">+</button>
-        <button class="zoom-btn" id="resetView">⌂</button>
-    </div>
-
-    <div class="loading" id="loading">Loading tiles...</div>
 
     <script>
-        /**
-         * Production Collaborative Whiteboard Frontend
-         * 
-         * Features:
-         * - Infinite pan and zoom
-         * - Real-time drawing synchronization
-         * - On-demand tile loading
-         * - Touch and mouse support
-         * - Optimized rendering
-         */
-
-        // Constants
-        const TILE_SIZE = 1000;
-        const MAX_ZOOM = 5;
-        const MIN_ZOOM = 0.1;
-        const ZOOM_STEP = 0.1;
-        const TILE_CACHE_SIZE = 50;
-        const RECONNECT_DELAY = 1000;
-        const PING_INTERVAL = 30000;
-
-        /**
-         * Main Whiteboard Application
-         */
-        class WhiteboardApp {
-            constructor() {
-                this.canvas = document.getElementById('canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.currentColor = '#000000';
-                this.currentSize = 5;
-                this.isDrawing = false;
-                this.lastPoint = null;
-                
-                // Transform state
-                this.transform = {
-                    x: 0,
-                    y: 0,
-                    scale: 1
-                };
-                
-                // Managers
-                this.networkManager = new NetworkManager(this);
-                this.tileManager = new TileManager(this);
-                this.inputManager = new InputManager(this);
-                this.renderer = new WhiteboardRenderer(this);
-                
-                this.init();
-            }
-            
-            init() {
-                this.setupCanvas();
-                this.setupControls();
-                this.setupEventListeners();
-                this.networkManager.connect();
-                this.startRenderLoop();
-            }
-            
-            setupCanvas() {
-                this.resizeCanvas();
-                window.addEventListener('resize', () => this.resizeCanvas());
-            }
-            
-            resizeCanvas() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-                this.renderer.redraw();
-            }
-            
-            setupControls() {
-                // Color picker
-                document.querySelectorAll('.color-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        document.querySelector('.color-btn.active').classList.remove('active');
-                        btn.classList.add('active');
-                        this.currentColor = btn.dataset.color;
-                    });
-                });
-                
-                // Brush size
-                const sizeSlider = document.getElementById('brushSize');
-                const sizeValue = document.getElementById('sizeValue');
-                sizeSlider.addEventListener('input', () => {
-                    this.currentSize = parseInt(sizeSlider.value);
-                    sizeValue.textContent = this.currentSize + 'px';
-                });
-                
-                // Clear button
-                document.getElementById('clearBtn').addEventListener('click', () => {
-                    this.renderer.clearView();
-                });
-                
-                // Zoom controls
-                document.getElementById('zoomIn').addEventListener('click', () => {
-                    this.zoomAt(this.canvas.width / 2, this.canvas.height / 2, ZOOM_STEP);
-                });
-                
-                document.getElementById('zoomOut').addEventListener('click', () => {
-                    this.zoomAt(this.canvas.width / 2, this.canvas.height / 2, -ZOOM_STEP);
-                });
-                
-                document.getElementById('resetView').addEventListener('click', () => {
-                    this.resetView();
-                });
-            }
-            
-            setupEventListeners() {
-                // Prevent default touch behaviors
-                document.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
-                document.addEventListener('touchend', e => e.preventDefault(), { passive: false });
-                document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
-            }
-            
-            startRenderLoop() {
-                const renderFrame = () => {
-                    this.renderer.render();
-                    requestAnimationFrame(renderFrame);
-                };
-                renderFrame();
-            }
-            
-            // Transform utilities
-            screenToWorld(screenX, screenY) {
-                return {
-                    x: (screenX - this.transform.x) / this.transform.scale,
-                    y: (screenY - this.transform.y) / this.transform.scale
-                };
-            }
-            
-            worldToScreen(worldX, worldY) {
-                return {
-                    x: worldX * this.transform.scale + this.transform.x,
-                    y: worldY * this.transform.scale + this.transform.y
-                };
-            }
-            
-            zoomAt(screenX, screenY, delta) {
-                const worldPoint = this.screenToWorld(screenX, screenY);
-                const newScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, this.transform.scale + delta));
-                
-                if (newScale !== this.transform.scale) {
-                    this.transform.scale = newScale;
-                    
-                    // Adjust translation to zoom at the specified point
-                    this.transform.x = screenX - worldPoint.x * this.transform.scale;
-                    this.transform.y = screenY - worldPoint.y * this.transform.scale;
-                    
-                    this.tileManager.updateVisibleTiles();
-                }
-            }
-            
-            resetView() {
-                this.transform.x = 0;
-                this.transform.y = 0;
-                this.transform.scale = 1;
-                this.tileManager.updateVisibleTiles();
-            }
-            
-            // Drawing methods
-            startDrawing(x, y) {
-                this.isDrawing = true;
-                this.lastPoint = { x, y };
-                this.drawStroke(x, y);
-            }
-            
-            continueDrawing(x, y) {
-                if (!this.isDrawing || !this.lastPoint) return;
-                
-                // Interpolate points for smooth lines
-                const dx = x - this.lastPoint.x;
-                const dy = y - this.lastPoint.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const steps = Math.max(1, Math.floor(distance / 2));
-                
-                for (let i = 0; i < steps; i++) {
-                    const t = i / steps;
-                    const interpX = this.lastPoint.x + dx * t;
-                    const interpY = this.lastPoint.y + dy * t;
-                    this.drawStroke(interpX, interpY);
-                }
-                
-                this.lastPoint = { x, y };
-            }
-            
-            stopDrawing() {
-                this.isDrawing = false;
-                this.lastPoint = null;
-            }
-            
-            drawStroke(x, y) {
-                const stroke = {
-                    x: x,
-                    y: y,
-                    color: this.currentColor,
-                    size: this.currentSize
-                };
-                
-                // Send to server
-                this.networkManager.sendStroke(stroke);
-                
-                // Draw locally for immediate feedback
-                this.renderer.drawStroke(stroke);
-            }
-            
-            // Handle incoming strokes from server
-            onStrokeReceived(stroke) {
-                this.renderer.drawStroke(stroke);
-                this.tileManager.addStrokeToCache(stroke);
-            }
-            
-            // Handle tile data from server
-            onTileReceived(tileData) {
-                this.tileManager.storeTile(tileData);
-                this.renderer.redraw();
-            }
-        }
-
-        /**
-         * Network Manager - handles WebSocket communication
-         */
-        class NetworkManager {
-            constructor(app) {
-                this.app = app;
-                this.ws = null;
-                this.isConnected = false;
-                this.reconnectAttempts = 0;
-                this.maxReconnectAttempts = 10;
-                this.pingInterval = null;
-            }
-            
-            connect() {
-                try {
-                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-                    const wsUrl = \`\${protocol}//\${window.location.host}\`;
-                    
-                    this.ws = new WebSocket(wsUrl);
-                    
-                    this.ws.onopen = () => {
-                        this.isConnected = true;
-                        this.reconnectAttempts = 0;
-                        this.updateStatus('Connected');
-                        this.startPing();
-                        
-                        // Request initial visible tiles
-                        this.app.tileManager.updateVisibleTiles();
-                    };
-                    
-                    this.ws.onmessage = (event) => {
-                        try {
-                            const message = JSON.parse(event.data);
-                            this.handleMessage(message);
-                        } catch (error) {
-                            console.error('Message parse error:', error);
-                        }
-                    };
-                    
-                    this.ws.onclose = () => {
-                        this.isConnected = false;
-                        this.updateStatus('Disconnected');
-                        this.stopPing();
-                        this.attemptReconnect();
-                    };
-                    
-                    this.ws.onerror = (error) => {
-                        console.error('WebSocket error:', error);
-                        this.updateStatus('Connection Error');
-                    };
-                    
-                } catch (error) {
-                    console.error('Connection error:', error);
-                    this.updateStatus('Connection Failed');
-                    this.attemptReconnect();
-                }
-            }
-            
-            handleMessage(message) {
-                switch (message.type) {
-                    case 'stroke':
-                        this.app.onStrokeReceived(message.data);
-                        break;
-                    case 'tileData':
-                        this.app.onTileReceived(message.tile);
-                        break;
-                    case 'pong':
-                        // Heartbeat response
-                        break;
-                    case 'error':
-                        console.error('Server error:', message.message);
-                        break;
-                    default:
-                        console.warn('Unknown message type:', message.type);
-                }
-            }
-            
-            sendStroke(stroke) {
-                if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
-                    this.ws.send(JSON.stringify({
-                        type: 'stroke',
-                        data: stroke
-                    }));
-                }
-            }
-            
-            requestTiles(tiles) {
-                if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
-                    this.ws.send(JSON.stringify({
-                        type: 'requestTiles',
-                        tiles: tiles
-                    }));
-                }
-            }
-            
-            startPing() {
-                this.pingInterval = setInterval(() => {
-                    if (this.isConnected && this.ws.readyState === WebSocket.OPEN) {
-                        this.ws.send(JSON.stringify({ type: 'ping' }));
-                    }
-                }, PING_INTERVAL);
-            }
-            
-            stopPing() {
-                if (this.pingInterval) {
-                    clearInterval(this.pingInterval);
-                    this.pingInterval = null;
-                }
-            }
-            
-            attemptReconnect() {
-                if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                    this.reconnectAttempts++;
-                    this.updateStatus(\`Reconnecting... (\${this.reconnectAttempts}/\${this.maxReconnectAttempts})\`);
-                    
-                    setTimeout(() => {
-                        this.connect();
-                    }, RECONNECT_DELAY * this.reconnectAttempts);
-                } else {
-                    this.updateStatus('Connection Failed - Refresh to retry');
-                }
-            }
-            
-            updateStatus(status) {
-                const statusEl = document.getElementById('status');
-                statusEl.textContent = status;
-                statusEl.className = 'status ' + (this.isConnected ? 'connected' : 'disconnected');
-            }
-        }
-
-        /**
-         * Tile Manager - handles tile loading and caching
-         */
-        class TileManager {
-            constructor(app) {
-                this.app = app;
-                this.tileCache = new Map(); // tileKey -> { strokes: [], lastAccess: timestamp }
-                this.loadedTiles = new Set();
-                this.pendingTiles = new Set();
-            }
-            
-            getTileKey(tileX, tileY) {
-                return \`\${tileX}:\${tileY}\`;
-            }
-            
-            getTileCoords(worldX, worldY) {
-                return {
-                    x: Math.floor(worldX / TILE_SIZE),
-                    y: Math.floor(worldY / TILE_SIZE)
-                };
-            }
-            
-            getVisibleTiles() {
-                const viewport = this.getViewport();
-                const tiles = [];
-                
-                const startTileX = Math.floor(viewport.left / TILE_SIZE);
-                const endTileX = Math.floor(viewport.right / TILE_SIZE);
-                const startTileY = Math.floor(viewport.top / TILE_SIZE);
-                const endTileY = Math.floor(viewport.bottom / TILE_SIZE);
-                
-                for (let tx = startTileX; tx <= endTileX; tx++) {
-                    for (let ty = startTileY; ty <= endTileY; ty++) {
-                        tiles.push({ x: tx, y: ty });
-                    }
-                }
-                
-                return tiles;
-            }
-            
-            getViewport() {
-                const topLeft = this.app.screenToWorld(0, 0);
-                const bottomRight = this.app.screenToWorld(this.app.canvas.width, this.app.canvas.height);
-                
-                return {
-                    left: topLeft.x,
-                    top: topLeft.y,
-                    right: bottomRight.x,
-                    bottom: bottomRight.y
-                };
-            }
-            
-            updateVisibleTiles() {
-                const visibleTiles = this.getVisibleTiles();
-                const tilesToRequest = [];
-                
-                for (const tile of visibleTiles) {
-                    const tileKey = this.getTileKey(tile.x, tile.y);
-                    
-                    if (!this.loadedTiles.has(tileKey) && !this.pendingTiles.has(tileKey)) {
-                        tilesToRequest.push(tile);
-                        this.pendingTiles.add(tileKey);
-                    }
-                }
-                
-                if (tilesToRequest.length > 0) {
-                    this.app.networkManager.requestTiles(tilesToRequest);
-                }
-            }
-            
-            storeTile(tileData) {
-                const tileKey = this.getTileKey(tileData.x, tileData.y);
-                
-                this.tileCache.set(tileKey, {
-                    strokes: tileData.strokes || [],
-                    lastAccess: Date.now()
-                });
-                
-                this.loadedTiles.add(tileKey);
-                this.pendingTiles.delete(tileKey);
-                
-                // Manage cache size
-                if (this.tileCache.size > TILE_CACHE_SIZE) {
-                    this.evictOldestTile();
-                }
-            }
-            
-            getTile(tileX, tileY) {
-                const tileKey = this.getTileKey(tileX, tileY);
-                const tile = this.tileCache.get(tileKey);
-                
-                if (tile) {
-                    tile.lastAccess = Date.now();
-                    return tile.strokes;
-                }
-                
-                return [];
-            }
-            
-            addStrokeToCache(stroke) {
-                const tileCoords = this.getTileCoords(stroke.x, stroke.y);
-                const tileKey = this.getTileKey(tileCoords.x, tileCoords.y);
-                
-                if (this.tileCache.has(tileKey)) {
-                    const tile = this.tileCache.get(tileKey);
-                    tile.strokes.push(stroke);
-                    tile.lastAccess = Date.now();
-                }
-            }
-            
-            evictOldestTile() {
-                let oldestKey = null;
-                let oldestTime = Date.now();
-                
-                for (const [key, tile] of this.tileCache) {
-                    if (tile.lastAccess < oldestTime) {
-                        oldestTime = tile.lastAccess;
-                        oldestKey = key;
-                    }
-                }
-                
-                if (oldestKey) {
-                    this.tileCache.delete(oldestKey);
-                    this.loadedTiles.delete(oldestKey);
-                }
-            }
-        }
-
-        /**
-         * Input Manager - handles mouse and touch events
-         */
-        class InputManager {
-            constructor(app) {
-                this.app = app;
-                this.isPanning = false;
-                this.lastPanPoint = null;
-                this.touches = new Map();
-                
-                this.setupEventListeners();
-            }
-            
-            setupEventListeners() {
-                const canvas = this.app.canvas;
-                
-                // Mouse events
-                canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
-                canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-                canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
-                canvas.addEventListener('wheel', (e) => this.handleWheel(e));
-                
-                // Touch events
-                canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-                canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
-                canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
-                
-                // Prevent context menu
-                canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-            }
-            
-            // Mouse event handlers
-            handleMouseDown(e) {
-                e.preventDefault();
-                const rect = this.app.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                if (e.button === 0) { // Left mouse button
-                    const worldPoint = this.app.screenToWorld(x, y);
-                    this.app.startDrawing(worldPoint.x, worldPoint.y);
-                } else if (e.button === 2) { // Right mouse button
-                    this.startPanning(x, y);
-                }
-            }
-            
-            handleMouseMove(e) {
-                e.preventDefault();
-                const rect = this.app.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                if (this.app.isDrawing) {
-                    const worldPoint = this.app.screenToWorld(x, y);
-                    this.app.continueDrawing(worldPoint.x, worldPoint.y);
-                } else if (this.isPanning) {
-                    this.continuePanning(x, y);
-                }
-            }
-            
-            handleMouseUp(e) {
-                e.preventDefault();
-                
-                if (e.button === 0) {
-                    this.app.stopDrawing();
-                } else if (e.button === 2) {
-                    this.stopPanning();
-                }
-            }
-            
-            handleWheel(e) {
-                e.preventDefault();
-                const rect = this.app.canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
-                this.app.zoomAt(x, y, delta);
-            }
-            
-            // Touch event handlers
-            handleTouchStart(e) {
-                e.preventDefault();
-                const rect = this.app.canvas.getBoundingClientRect();
-                
-                for (const touch of e.changedTouches) {
-                    const x = touch.clientX - rect.left;
-                    const y = touch.clientY - rect.top;
-                    
-                    this.touches.set(touch.identifier, { x, y, startTime: Date.now() });
-                }
-                
-                if (e.touches.length === 1) {
-                    // Single touch - start drawing
-                    const touch = e.touches[0];
-                    const x = touch.clientX - rect.left;
-                    const y = touch.clientY - rect.top;
-                    const worldPoint = this.app.screenToWorld(x, y);
-                    this.app.startDrawing(worldPoint.x, worldPoint.y);
-                } else if (e.touches.length === 2) {
-                    // Two finger touch - start panning
-                    this.app.stopDrawing();
-                    const touch1 = e.touches[0];
-                    const touch2 = e.touches[1];
-                    const centerX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
-                    const centerY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
-                    this.startPanning(centerX, centerY);
-                }
-            }
-            
-            handleTouchMove(e) {
-                e.preventDefault();
-                const rect = this.app.canvas.getBoundingClientRect();
-                
-                if (e.touches.length === 1 && this.app.isDrawing) {
-                    // Single touch - continue drawing
-                    const touch = e.touches[0];
-                    const x = touch.clientX - rect.left;
-                    const y = touch.clientY - rect.top;
-                    const worldPoint = this.app.screenToWorld(x, y);
-                    this.app.continueDrawing(worldPoint.x, worldPoint.y);
-                } else if (e.touches.length === 2 && this.isPanning) {
-                    // Two finger touch - continue panning
-                    const touch1 = e.touches[0];
-                    const touch2 = e.touches[1];
-                    const centerX = (touch1.clientX + touch2.clientX) / 2 - rect.left;
-                    const centerY = (touch1.clientY + touch2.clientY) / 2 - rect.top;
-                    this.continuePanning(centerX, centerY);
-                }
-            }
-            
-            handleTouchEnd(e) {
-                e.preventDefault();
-                
-                for (const touch of e.changedTouches) {
-                    this.touches.delete(touch.identifier);
-                }
-                
-                if (e.touches.length === 0) {
-                    this.app.stopDrawing();
-                    this.stopPanning();
-                }
-            }
-            
-            // Panning utilities
-            startPanning(x, y) {
-                this.isPanning = true;
-                this.lastPanPoint = { x, y };
-                this.app.canvas.style.cursor = 'grab';
-            }
-            
-            continuePanning(x, y) {
-                if (!this.isPanning || !this.lastPanPoint) return;
-                
-                const dx = x - this.lastPanPoint.x;
-                const dy = y - this.lastPanPoint.y;
-                
-                this.app.transform.x += dx;
-                this.app.transform.y += dy;
-                
-                this.lastPanPoint = { x, y };
-                this.app.tileManager.updateVisibleTiles();
-            }
-            
-            stopPanning() {
-                this.isPanning = false;
-                this.lastPanPoint = null;
-                this.app.canvas.style.cursor = 'crosshair';
-            }
-        }
-
-        /**
-         * Whiteboard Renderer - handles canvas drawing and optimization
-         */
-        class WhiteboardRenderer {
-            constructor(app) {
-                this.app = app;
-                this.needsRedraw = true;
-                this.strokeBuffer = [];
-            }
-            
-            render() {
-                if (this.needsRedraw) {
-                    this.redraw();
-                    this.needsRedraw = false;
-                }
-                
-                // Draw buffered strokes
-                if (this.strokeBuffer.length > 0) {
-                    this.drawBufferedStrokes();
-                    this.strokeBuffer = [];
-                }
-            }
-            
-            redraw() {
-                const ctx = this.app.ctx;
-                const canvas = this.app.canvas;
-                
-                // Clear canvas
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // Set transform
-                ctx.save();
-                ctx.translate(this.app.transform.x, this.app.transform.y);
-                ctx.scale(this.app.transform.scale, this.app.transform.scale);
-                
-                // Draw grid (optional)
-                this.drawGrid();
-                
-                // Draw tiles
-                this.drawVisibleTiles();
-                
-                ctx.restore();
-            }
-            
-            drawGrid() {
-                const ctx = this.app.ctx;
-                const viewport = this.app.tileManager.getViewport();
-                
-                ctx.strokeStyle = '#f0f0f0';
-                ctx.lineWidth = 1 / this.app.transform.scale;
-                
-                // Draw tile boundaries
-                const startX = Math.floor(viewport.left / TILE_SIZE) * TILE_SIZE;
-                const endX = Math.ceil(viewport.right / TILE_SIZE) * TILE_SIZE;
-                const startY = Math.floor(viewport.top / TILE_SIZE) * TILE_SIZE;
-                const endY = Math.ceil(viewport.bottom / TILE_SIZE) * TILE_SIZE;
-                
-                ctx.beginPath();
-                for (let x = startX; x <= endX; x += TILE_SIZE) {
-                    ctx.moveTo(x, viewport.top);
-                    ctx.lineTo(x, viewport.bottom);
-                }
-                for (let y = startY; y <= endY; y += TILE_SIZE) {
-                    ctx.moveTo(viewport.left, y);
-                    ctx.lineTo(viewport.right, y);
-                }
-                ctx.stroke();
-            }
-            
-            drawVisibleTiles() {
-                const visibleTiles = this.app.tileManager.getVisibleTiles();
-                
-                for (const tile of visibleTiles) {
-                    const strokes = this.app.tileManager.getTile(tile.x, tile.y);
-                    for (const stroke of strokes) {
-                        this.drawSingleStroke(stroke);
-                    }
-                }
-            }
-            
-            drawStroke(stroke) {
-                // Add to buffer for next render
-                this.strokeBuffer.push(stroke);
-            }
-            
-            drawBufferedStrokes() {
-                const ctx = this.app.ctx;
-                
-                ctx.save();
-                ctx.translate(this.app.transform.x, this.app.transform.y);
-                ctx.scale(this.app.transform.scale, this.app.transform.scale);
-                
-                for (const stroke of this.strokeBuffer) {
-                    this.drawSingleStroke(stroke);
-                }
-                
-                ctx.restore();
-            }
-            
-            drawSingleStroke(stroke) {
-                const ctx = this.app.ctx;
-                
-                ctx.fillStyle = stroke.color;
-                ctx.beginPath();
-                ctx.arc(stroke.x, stroke.y, stroke.size / 2, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            
-            clearView() {
-                // Clear only the visible area, not the entire canvas data
-                this.needsRedraw = true;
-            }
-        }
-
-        // Initialize the application
-        let app;
+        let strokeCount = 0;
+        let isStroking = false;
+        let lastY = 0;
+        let direction = 0; // 1 for down, -1 for up
         
-        document.addEventListener('DOMContentLoaded', () => {
-            app = new WhiteboardApp();
-        });
-
-        // Handle visibility changes for performance
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                // App is hidden, reduce activity
-                if (app && app.networkManager) {
-                    app.networkManager.stopPing();
+        const stick = document.getElementById('stick');
+        const stickContainer = document.getElementById('stickContainer');
+        const strokeCountElement = document.getElementById('strokeCount');
+        const messageElement = document.getElementById('message');
+        const effectsContainer = document.getElementById('effects');
+        
+        const cursedMessages = [
+            "The stick hungers for more...",
+            "YESSSS... STROKE HARDER!",
+            "You feel the dark magic flowing...",
+            "The ancient ones are pleased...",
+            "MOOOORE STROKES!",
+            "The stick is getting warm...",
+            "Something is awakening...",
+            "The portal is opening...",
+            "YOU HAVE ANGERED THE STICK GODS!",
+            "The stick demands sacrifice...",
+            "Reality is bending...",
+            "The stroking never ends...",
+            "You cannot stop now...",
+            "The stick owns your soul...",
+            "STROKE FOR ETERNITY!"
+        ];
+        
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 3 + 's';
+            effectsContainer.appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 3000);
+        }
+        
+        function updateMessage() {
+            const message = cursedMessages[Math.floor(Math.random() * cursedMessages.length)];
+            messageElement.textContent = message;
+            messageElement.style.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        }
+        
+        function handleStroke(event) {
+            if (!isStroking) return;
+            
+            const currentY = event.clientY || event.touches[0].clientY;
+            const deltaY = currentY - lastY;
+            const currentDirection = deltaY > 0 ? 1 : -1;
+            
+            if (Math.abs(deltaY) > 5 && direction !== currentDirection) {
+                direction = currentDirection;
+                strokeCount++;
+                strokeCountElement.textContent = strokeCount;
+                
+                // Visual feedback
+                stick.style.transform = `translateY(${deltaY * 0.5}px) scale(${1 + Math.abs(deltaY) * 0.01})`;
+                
+                // Create particles
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => createParticle(), i * 100);
                 }
-            } else {
-                // App is visible, resume activity
-                if (app && app.networkManager && app.networkManager.isConnected) {
-                    app.networkManager.startPing();
+                
+                // Update message
+                if (strokeCount % 5 === 0) {
+                    updateMessage();
+                }
+                
+                // Intensify effects
+                if (strokeCount > 50) {
+                    document.body.style.background = `hsl(${Math.random() * 360}, 70%, 10%)`;
+                    document.body.style.animation = 'glitch 0.5s infinite';
+                }
+                
+                if (strokeCount > 100) {
+                    messageElement.textContent = "THE STICK HAS TRANSCENDED REALITY!";
+                    messageElement.style.fontSize = '2em';
+                    messageElement.style.animation = 'glitch 0.1s infinite';
                 }
             }
+            
+            lastY = currentY;
+        }
+        
+        // Mouse events
+        stickContainer.addEventListener('mousedown', (e) => {
+            isStroking = true;
+            lastY = e.clientY;
+            stick.classList.add('stroking');
+            stickContainer.style.cursor = 'grabbing';
         });
+        
+        document.addEventListener('mousemove', handleStroke);
+        
+        document.addEventListener('mouseup', () => {
+            isStroking = false;
+            stick.classList.remove('stroking');
+            stick.style.transform = 'translateY(0) scale(1)';
+            stickContainer.style.cursor = 'grab';
+        });
+        
+        // Touch events
+        stickContainer.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            isStroking = true;
+            lastY = e.touches[0].clientY;
+            stick.classList.add('stroking');
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            handleStroke(e);
+        });
+        
+        document.addEventListener('touchend', () => {
+            isStroking = false;
+            stick.classList.remove('stroking');
+            stick.style.transform = 'translateY(0) scale(1)';
+        });
+        
+        // Initialize particles
+        setInterval(createParticle, 500);
+        
+        // Easter egg
+        setTimeout(() => {
+            if (strokeCount === 0) {
+                messageElement.textContent = "Why aren't you stroking? The stick is lonely...";
+            }
+        }, 10000);
     </script>
 </body>
 </html>
